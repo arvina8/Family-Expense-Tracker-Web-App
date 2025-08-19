@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { Card, Button } from '../components/UI/Components';
+import { Plus, Users, AlertCircle, Calculator, Calendar } from 'lucide-react';
 
 const AddExpense = ({ onExpenseAdded }) => {
   const [amount, setAmount] = useState('');
@@ -95,191 +97,234 @@ const AddExpense = ({ onExpenseAdded }) => {
   };
 
   return (
-    <div className="bg-white p-6 rounded shadow-md">
-      <h2 className="text-xl font-semibold mb-4">Add Expense</h2>
-      
-      {users.length === 0 && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-          <div className="text-red-800 font-medium mb-2">⚠️ No Family Members Found</div>
-          <div className="text-red-700 text-sm mb-3">
-            You need to add family members before creating expenses. 
-          </div>
-          <a 
-            href="/family" 
-            className="inline-block px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
-          >
-            Add Family Members First
-          </a>
-        </div>
-      )}
+    <div className="space-y-6">
+      <div className="text-center mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2 flex items-center justify-center">
+          <Plus className="w-8 h-8 mr-3 text-blue-600" />
+          Add New Expense
+        </h1>
+        <p className="text-gray-600">Track and split expenses with your family members</p>
+      </div>
 
-      {categories.length === 0 && (
-        <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-          <div className="text-yellow-800 font-medium mb-2">⚠️ No Categories Found</div>
-          <div className="text-yellow-700 text-sm mb-3">
-            You should add some expense categories for better organization.
-          </div>
-          <a 
-            href="/categories" 
-            className="inline-block px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 text-sm"
-          >
-            Add Categories
-          </a>
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Amount</label>
-          <input 
-            type="number" 
-            step="0.01"
-            placeholder="Enter amount" 
-            className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" 
-            value={amount} 
-            onChange={e => setAmount(e.target.value)} 
-            required 
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
-          <select 
-            className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" 
-            value={category} 
-            onChange={e => setCategory(e.target.value)} 
-            required
-            disabled={categories.length === 0}
-          >
-            <option value="">{categories.length === 0 ? 'No categories available' : 'Select Category'}</option>
-            {categories.map(cat => (
-              <option key={cat._id} value={cat._id}>{cat.name}</option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
-          <input 
-            type="date" 
-            className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" 
-            value={date} 
-            onChange={e => setDate(e.target.value)} 
-            required 
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Paid By</label>
-          <select 
-            className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" 
-            value={paidBy} 
-            onChange={e => setPaidBy(e.target.value)} 
-            required
-            disabled={users.length === 0}
-          >
-            <option value="">{users.length === 0 ? 'No family members available' : 'Select who paid'}</option>
-            {users.map(user => (
-              <option key={user._id} value={user._id}>{user.name}</option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Description (optional)</label>
-          <input 
-            type="text" 
-            placeholder="What was this expense for?" 
-            className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" 
-            value={description} 
-            onChange={e => setDescription(e.target.value)} 
-          />
-        </div>
-
-        {users.length > 0 && (
-          <>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Split Type</label>
-              <div className="space-y-2">
-                <label className="flex items-center">
-                  <input 
-                    type="radio" 
-                    value="even" 
-                    checked={splitType === 'even'} 
-                    onChange={e => setSplitType(e.target.value)}
-                    className="mr-2"
-                  />
-                  Split evenly among all family members
-                </label>
-                <label className="flex items-center">
-                  <input 
-                    type="radio" 
-                    value="custom" 
-                    checked={splitType === 'custom'} 
-                    onChange={e => setSplitType(e.target.value)}
-                    className="mr-2"
-                  />
-                  Custom split ratios
-                </label>
-              </div>
+      <Card className="max-w-2xl mx-auto">
+        {users.length === 0 && (
+          <div className="mb-6 p-4 bg-red-50 border-2 border-red-200 rounded-xl">
+            <div className="flex items-center mb-2">
+              <AlertCircle className="w-5 h-5 text-red-600 mr-2" />
+              <div className="text-red-800 font-medium">No Family Members Found</div>
             </div>
-
-            {splitType === 'custom' && (
-              <div className="border p-4 rounded-md bg-gray-50">
-                <h3 className="font-medium mb-3">Custom Split Ratios</h3>
-                <p className="text-sm text-gray-600 mb-3">
-                  Enter decimal values that sum to 1.0 (e.g., 0.6 for 60%, 0.4 for 40%)
-                </p>
-                <div className="space-y-2">
-                  {users.map(user => (
-                    <div key={user._id} className="flex items-center justify-between">
-                      <span className="text-sm font-medium">{user.name}</span>
-                      <div className="flex items-center space-x-2">
-                        <input 
-                          type="number" 
-                          step="0.01" 
-                          min="0" 
-                          max="1"
-                          placeholder="0.00"
-                          className="w-20 p-1 border border-gray-300 rounded text-sm"
-                          value={customSplit.find(split => split.user === user._id)?.ratio || 0}
-                          onChange={e => handleCustomSplitChange(user._id, e.target.value)}
-                        />
-                        <span className="text-sm text-gray-500">
-                          ({((customSplit.find(split => split.user === user._id)?.ratio || 0) * 100).toFixed(1)}%)
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                  <div className="pt-2 border-t">
-                    <div className="flex justify-between text-sm">
-                      <span className="font-medium">Total:</span>
-                      <span className={getTotalRatio() === 1 ? 'text-green-600' : 'text-red-600'}>
-                        {getTotalRatio().toFixed(3)} ({(getTotalRatio() * 100).toFixed(1)}%)
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </>
+            <div className="text-red-700 text-sm mb-3">
+              You need to add family members before creating expenses. 
+            </div>
+            <Button variant="danger" size="sm">
+              <a href="/family" className="flex items-center">
+                <Users className="w-4 h-4 mr-2" />
+                Add Family Members First
+              </a>
+            </Button>
+          </div>
         )}
 
-        <button 
-          className={`w-full py-2 px-4 rounded-md focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-            users.length === 0 || categories.length === 0
-              ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
-              : 'bg-blue-600 text-white hover:bg-blue-700'
-          }`}
-          type="submit"
-          disabled={users.length === 0 || categories.length === 0}
-        >
-          {users.length === 0 || categories.length === 0 
-            ? 'Please add family members and categories first' 
-            : 'Add Expense'
-          }
-        </button>
-      </form>
+        {categories.length === 0 && (
+          <div className="mb-6 p-4 bg-yellow-50 border-2 border-yellow-200 rounded-xl">
+            <div className="flex items-center mb-2">
+              <AlertCircle className="w-5 h-5 text-yellow-600 mr-2" />
+              <div className="text-yellow-800 font-medium">No Categories Found</div>
+            </div>
+            <div className="text-yellow-700 text-sm mb-3">
+              You should add some expense categories for better organization.
+            </div>
+            <Button variant="outline" size="sm">
+              <a href="/categories" className="flex items-center text-yellow-600">
+                Add Categories
+              </a>
+            </Button>
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Amount (₹)
+              </label>
+              <input 
+                type="number" 
+                step="0.01"
+                placeholder="0.00" 
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg font-medium" 
+                value={amount} 
+                onChange={e => setAmount(e.target.value)} 
+                required 
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Date
+              </label>
+              <div className="relative">
+                <Calendar className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <input 
+                  type="date" 
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                  value={date} 
+                  onChange={e => setDate(e.target.value)} 
+                  required 
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Category
+              </label>
+              <select 
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                value={category} 
+                onChange={e => setCategory(e.target.value)} 
+                required
+                disabled={categories.length === 0}
+              >
+                <option value="">{categories.length === 0 ? 'No categories available' : 'Select Category'}</option>
+                {categories.map(cat => (
+                  <option key={cat._id} value={cat._id}>{cat.name}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Paid By
+              </label>
+              <select 
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                value={paidBy} 
+                onChange={e => setPaidBy(e.target.value)} 
+                required
+                disabled={users.length === 0}
+              >
+                <option value="">{users.length === 0 ? 'No family members available' : 'Select who paid'}</option>
+                {users.map(user => (
+                  <option key={user._id} value={user._id}>{user.name}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Description (optional)
+            </label>
+            <input 
+              type="text" 
+              placeholder="What was this expense for?" 
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+              value={description} 
+              onChange={e => setDescription(e.target.value)} 
+            />
+          </div>
+
+          {users.length > 0 && (
+            <Card className="bg-gray-50 border-gray-200">
+              <div className="flex items-center mb-4">
+                <Calculator className="w-5 h-5 text-gray-600 mr-2" />
+                <h3 className="text-lg font-medium text-gray-800">Split Configuration</h3>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <label className="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-white transition-colors">
+                    <input 
+                      type="radio" 
+                      value="even" 
+                      checked={splitType === 'even'} 
+                      onChange={e => setSplitType(e.target.value)}
+                      className="mr-3"
+                    />
+                    <div>
+                      <div className="font-medium text-gray-800">Even Split</div>
+                      <div className="text-sm text-gray-600">Split equally among all members</div>
+                    </div>
+                  </label>
+                  
+                  <label className="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-white transition-colors">
+                    <input 
+                      type="radio" 
+                      value="custom" 
+                      checked={splitType === 'custom'} 
+                      onChange={e => setSplitType(e.target.value)}
+                      className="mr-3"
+                    />
+                    <div>
+                      <div className="font-medium text-gray-800">Custom Split</div>
+                      <div className="text-sm text-gray-600">Set custom ratios for each member</div>
+                    </div>
+                  </label>
+                </div>
+
+                {splitType === 'custom' && (
+                  <div className="border-2 border-blue-200 p-4 rounded-lg bg-blue-50">
+                    <h4 className="font-medium mb-3 text-blue-800">Custom Split Ratios</h4>
+                    <p className="text-sm text-blue-600 mb-4">
+                      Enter decimal values that sum to 1.0 (e.g., 0.6 for 60%, 0.4 for 40%)
+                    </p>
+                    <div className="space-y-3">
+                      {users.map(user => (
+                        <div key={user._id} className="flex items-center justify-between bg-white p-3 rounded-lg">
+                          <span className="font-medium text-gray-800">{user.name}</span>
+                          <div className="flex items-center space-x-3">
+                            <input 
+                              type="number" 
+                              step="0.01" 
+                              min="0" 
+                              max="1"
+                              placeholder="0.00"
+                              className="w-24 px-3 py-2 border border-gray-300 rounded-lg text-center focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                              value={customSplit.find(split => split.user === user._id)?.ratio || 0}
+                              onChange={e => handleCustomSplitChange(user._id, e.target.value)}
+                            />
+                            <span className="text-sm text-gray-600 min-w-[60px]">
+                              ({((customSplit.find(split => split.user === user._id)?.ratio || 0) * 100).toFixed(1)}%)
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                      <div className="pt-3 border-t border-blue-200">
+                        <div className="flex justify-between items-center">
+                          <span className="font-medium text-blue-800">Total:</span>
+                          <span className={`font-bold ${getTotalRatio() === 1 ? 'text-green-600' : 'text-red-600'}`}>
+                            {getTotalRatio().toFixed(3)} ({(getTotalRatio() * 100).toFixed(1)}%)
+                          </span>
+                        </div>
+                        {Math.abs(getTotalRatio() - 1) > 0.001 && (
+                          <p className="text-sm text-red-600 mt-1">
+                            ⚠️ Ratios must sum to 1.0 (100%)
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </Card>
+          )}
+
+          <Button 
+            type="submit"
+            variant={users.length === 0 || categories.length === 0 ? "secondary" : "primary"}
+            className="w-full py-4 text-lg"
+            disabled={users.length === 0 || categories.length === 0}
+          >
+            {users.length === 0 || categories.length === 0 
+              ? 'Please add family members and categories first' 
+              : 'Add Expense'
+            }
+          </Button>
+        </form>
+      </Card>
     </div>
   );
 };
