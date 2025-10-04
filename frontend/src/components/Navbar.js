@@ -7,13 +7,14 @@ import { useAuth } from '../context/AuthContext';
 
 const Navbar = () => {
   const location = useLocation();
-  const { user, logout } = useAuth();
+  const { user, currentGroup } = useAuth();
 
+  const base = currentGroup ? `/app/${currentGroup}` : '';
   const navItems = [
-    { path: '/', label: 'Dashboard', icon: Home },
-    { path: '/add', label: 'Add Expense', icon: Plus },
-    { path: '/categories', label: 'Categories', icon: Tags },
-    { path: '/reports', label: 'Reports', icon: BarChart3 },
+    { path: currentGroup ? `${base}/dashboard` : '/', label: 'Dashboard', icon: Home },
+    { path: currentGroup ? `${base}/add` : '/add', label: 'Add Expense', icon: Plus },
+    { path: currentGroup ? `${base}/categories` : '/categories', label: 'Categories', icon: Tags },
+    { path: currentGroup ? `${base}/reports` : '/reports', label: 'Reports', icon: BarChart3 },
   ];
 
   return (

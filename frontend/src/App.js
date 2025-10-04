@@ -33,8 +33,11 @@ const Protected = ({ children }) => {
     const onlyId = memberships[0].group._id;
     return <Navigate to={`/app/${onlyId}/dashboard`} replace />;
   }
-  // If multiple groups and at dashboard root without group param, go to selector
+  // If multiple groups and at root: if a currentGroup is set stay in that group, else go select
   if (count > 1 && location.pathname === '/') {
+    if (currentGroup && memberships.some(m => m.group._id === currentGroup)) {
+      return <Navigate to={`/app/${currentGroup}/dashboard`} replace />;
+    }
     return <Navigate to="/select-group" replace />;
   }
   // Sync currentGroup with route param if present
@@ -65,7 +68,8 @@ function App() {
             <Route path="/invite/:token" element={<Protected><InviteAcceptPage /></Protected>} />
             <Route path="/app/:groupId/dashboard" element={<Protected><Dashboard /></Protected>} />
             <Route path="/" element={<Protected><Dashboard /></Protected>} />
-            <Route path="/add" element={
+            {/* Group-scoped feature routes */}
+            <Route path="/app/:groupId/add" element={
               <Protected>
                 <GradientBackground className="min-h-screen py-8">
                   <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -74,8 +78,8 @@ function App() {
                 </GradientBackground>
               </Protected>
             } />
-            <Route path="/reports" element={<Protected><Reports /></Protected>} />
-            <Route path="/categories" element={
+            <Route path="/app/:groupId/reports" element={<Protected><Reports /></Protected>} />
+            <Route path="/app/:groupId/categories" element={
               <Protected>
                 <GradientBackground className="min-h-screen py-8">
                   <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -84,6 +88,10 @@ function App() {
                 </GradientBackground>
               </Protected>
             } />
+            {/* Backwards-compatible non-group paths: delegate to Protected which will redirect */}
+            <Route path="/add" element={<Protected><Navigate to="/" replace /></Protected>} />
+            <Route path="/categories" element={<Protected><Navigate to="/" replace /></Protected>} />
+            <Route path="/reports" element={<Protected><Navigate to="/" replace /></Protected>} />
           </Routes>
         </div>
       </Router>

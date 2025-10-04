@@ -68,18 +68,60 @@ A comprehensive MERN stack web application for tracking and managing group expen
 - `GET /api/groups/:groupId/invites` - Pending invites (admin)
 - `POST /api/groups/invites/:token/accept` - Accept invite
 
-### Family Members
-
-- `GET /api/users` - Retrieve all family members
-
 ### Categories
+
+Categories are scoped per group and require authentication + membership.
+
+Endpoints:
+
+- `GET /api/categories?groupId=<groupId>` – List categories in a group
+- `POST /api/categories` – Create category `{ name, group }`
+- `PUT /api/categories/:id` – Rename a category `{ name }`
+- `DELETE /api/categories/:id` – Remove a category (expenses keep the ObjectId reference; consider soft-delete in future)
+
+Uniqueness: `(group, name)` is enforced with a unique compound index.
+
+Default seeding: When a group is created, a default set of categories is inserted (see `DEFAULT_CATEGORIES` in backend controller/model logic).
 
 ### Expenses
 
-- `GET /api/expenses` - Retrieve all expenses
-- `POST /api/expenses` - Add new expense
+- `GET /api/expenses?groupId=<groupId>` - Retrieve group expenses
+- `POST /api/expenses` - Add new expense (body: `group, amount, category, date, paidBy, notes, split?`)
 - `GET /api/expenses/:id` - Get specific expense
-- **Can't add expenses**: Ensure group members and categories exist
+- `PUT /api/expenses/:id` - Update expense fields
+- `DELETE /api/expenses/:id` - Remove an expense
+- `GET /api/expenses/balances?groupId=<groupId>` - Aggregated per-member paid/owes/balance
+
+Split logic:
+- Even split (no `split[]` provided): divides equally among current group members
+- Custom split: provide `split: [{ user, ratio }, ...]` where ratios sum to 1.0 (±0.001 tolerance)
+
+Validation ensures total ratio correctness.
+
+Requirements to create an expense:
+- Valid group membership
+- Existing category inside that group
+- `paidBy` user must be a member of the group
+
+### Finding / Using Group ID or Code
+
+You can join a group via either its MongoDB ObjectId (`_id`) or its short auto-generated `code`.
+
+Where to find them:
+1. After creating a group (response body contains `_id` and `code`).
+2. Call `GET /api/groups/:groupId` (if you are a member) – returns full group including `code`.
+3. In the frontend, open the network tab when creating or viewing a group; or enhance UI (next improvement) to display it.
+
+Join endpoint usage:
+
+```
+POST /api/groups/join
+{ "groupIdOrCode": "ABC123" }
+```
+
+If the value matches a 24-char hex it attempts an `_id` lookup first; otherwise it uppercases and searches by `code`.
+
+Future UI improvement suggestion: Add a small panel on the Members tab showing “Group Code: ABC123” with a copy-to-clipboard button.
 
 ## 🔧 Development
 
