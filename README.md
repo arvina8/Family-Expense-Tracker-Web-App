@@ -93,12 +93,14 @@ Default seeding: When a group is created, a default set of categories is inserte
 - `GET /api/expenses/balances?groupId=<groupId>` - Aggregated per-member paid/owes/balance
 
 Split logic:
+
 - Even split (no `split[]` provided): divides equally among current group members
 - Custom split: provide `split: [{ user, ratio }, ...]` where ratios sum to 1.0 (±0.001 tolerance)
 
 Validation ensures total ratio correctness.
 
 Requirements to create an expense:
+
 - Valid group membership
 - Existing category inside that group
 - `paidBy` user must be a member of the group
@@ -108,6 +110,7 @@ Requirements to create an expense:
 You can join a group via either its MongoDB ObjectId (`_id`) or its short auto-generated `code`.
 
 Where to find them:
+
 1. After creating a group (response body contains `_id` and `code`).
 2. Call `GET /api/groups/:groupId` (if you are a member) – returns full group including `code`.
 3. In the frontend, open the network tab when creating or viewing a group; or enhance UI (next improvement) to display it.

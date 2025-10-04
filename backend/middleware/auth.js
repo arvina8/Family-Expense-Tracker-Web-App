@@ -19,7 +19,7 @@ exports.auth = async (req, res, next) => {
 exports.requireGroupMember = (getGroupIdFromReq) => async (req, res, next) => {
   const groupId = typeof getGroupIdFromReq === 'function' ? getGroupIdFromReq(req) : req.params.groupId || req.body.group || req.query.groupId;
   if (!groupId) return res.status(400).json({ error: 'groupId is required' });
-  const isMember = req.user.memberships?.some(m => String(m.group) === String(groupId));
+  const isMember = req.user.memberships?.some(m => String(m.group?._id || m.group) === String(groupId));
   if (!isMember) return res.status(403).json({ error: 'Forbidden: not a group member' });
   req.groupId = groupId;
   next();
@@ -28,7 +28,7 @@ exports.requireGroupMember = (getGroupIdFromReq) => async (req, res, next) => {
 exports.requireGroupAdmin = (getGroupIdFromReq) => async (req, res, next) => {
   const groupId = typeof getGroupIdFromReq === 'function' ? getGroupIdFromReq(req) : req.params.groupId || req.body.group || req.query.groupId;
   if (!groupId) return res.status(400).json({ error: 'groupId is required' });
-  const isAdmin = req.user.memberships?.some(m => String(m.group) === String(groupId) && m.role === 'admin');
+  const isAdmin = req.user.memberships?.some(m => String(m.group?._id || m.group) === String(groupId) && m.role === 'admin');
   if (!isAdmin) return res.status(403).json({ error: 'Admin privileges required' });
   req.groupId = groupId;
   next();

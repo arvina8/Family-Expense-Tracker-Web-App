@@ -1,25 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import client from '../api/client';
 import { useAuth } from '../context/AuthContext';
-import ExpenseList from '../components/ExpenseList';
-import CategoryManager from '../components/CategoryManager';
+import { useTheme } from '../context/ThemeContext';
 import ExpenseSplitting from '../components/ExpenseSplitting';
-import GroupMembersManager from '../components/GroupMembersManager';
-import AddExpense from './AddExpense';
 import { ExpenseByCategory, ExpensePieChart, MonthlyExpenseChart } from '../components/Charts/ExpenseChart';
 import { QuickStatsGrid } from '../components/UI/StatsCards';
 import { GradientBackground, Card } from '../components/UI/Components';
-import { TrendingUp, Users, PlusCircle, Eye, Settings, BarChart3 } from 'lucide-react';
+import { TrendingUp, Users, Wallet, Activity, Calendar, ArrowUpRight, ArrowDownRight, DollarSign, Plus, Eye } from 'lucide-react';
 
 const Dashboard = () => {
-  const [activeTab, setActiveTab] = useState('overview');
   const [refreshKey, setRefreshKey] = useState(0);
   const { currentGroup } = useAuth();
+  const { theme } = useTheme();
   const [expenses, setExpenses] = useState([]);
   const [categories, setCategories] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [groupMeta, setGroupMeta] = useState(null);
+  const [recentExpenses, setRecentExpenses] = useState([]);
 
   useEffect(() => {
     if (!currentGroup) return;
@@ -36,9 +34,9 @@ const Dashboard = () => {
       ]);
       setExpenses(expensesRes.data);
       setCategories(categoriesRes.data);
-      // Derive users from current group
-  setUsers(groupRes.data.members?.map(m => m.user) ?? []);
-  setGroupMeta(groupRes.data);
+      setUsers(groupRes.data.members?.map(m => m.user) ?? []);
+      setGroupMeta(groupRes.data);
+      setRecentExpenses(expensesRes.data.slice(0, 5));
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -46,153 +44,241 @@ const Dashboard = () => {
     }
   };
 
-  const handleExpenseAdded = () => {
-    // Trigger a refresh of the expense list and balances
-    setRefreshKey(prev => prev + 1);
-  };
-
-  const tabs = [
-    { id: 'overview', label: 'Overview', icon: TrendingUp, color: 'from-blue-500 to-blue-600' },
-    { id: 'analytics', label: 'Analytics', icon: BarChart3, color: 'from-purple-500 to-purple-600' },
-  { id: 'members', label: 'Group Members', icon: Users, color: 'from-green-500 to-green-600' },
-    { id: 'add-expense', label: 'Add Expense', icon: PlusCircle, color: 'from-orange-500 to-orange-600' },
-    { id: 'expenses', label: 'All Expenses', icon: Eye, color: 'from-indigo-500 to-indigo-600' },
-    { id: 'categories', label: 'Categories', icon: Settings, color: 'from-pink-500 to-pink-600' },
-  ];
-
-  const renderTabContent = () => {
-    if (loading) {
-      return (
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+  if (loading) {
+    return (
+      <GradientBackground className={`min-h-screen bg-gradient-to-br ${theme.colors.background}`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex justify-center items-center h-64">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+              <p className={`${theme.colors.text} text-lg`}>Loading your dashboard...</p>
+            </div>
+          </div>
         </div>
-      );
-    }
+      </GradientBackground>
+    );
+  }
 
-    switch(activeTab) {
-      case 'overview':
-        return (
-          <div className="space-y-8">
-            <QuickStatsGrid expenses={expenses} users={users} categories={categories} />
+  return (
+    <GradientBackground className={`min-h-screen bg-gradient-to-br ${theme.colors.background}`}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Dashboard Header */}
+        <div className="mb-8">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+            <div className="mb-6 lg:mb-0">
+              <h1 className={`text-4xl font-bold ${theme.colors.text} mb-2 flex items-center`}>
+                <div className="w-12 h-12 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mr-4 shadow-lg">
+                  <Wallet className="w-6 h-6 text-white" />
+                </div>
+                Dashboard
+              </h1>
+              <p className={`${theme.colors.textSecondary} text-lg`}>
+                Welcome back! Here's your expense overview.
+              </p>
+            </div>
             
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <Card>
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">Recent Expenses</h3>
-                <div className="space-y-3">
-                  {expenses.slice(0, 5).map(expense => (
-                    <div key={expense._id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                      <div>
-                        <p className="font-medium text-gray-800">{expense.notes || 'No notes'}</p>
-                        <p className="text-sm text-gray-600">{expense.category?.name} • {expense.paidBy?.name}</p>
+            {/* Quick Actions */}
+            <div className="flex space-x-3">
+              <a 
+                href={`/app/${currentGroup}/add`}
+                className={`
+                  inline-flex items-center px-6 py-3 rounded-xl font-medium text-white
+                  bg-gradient-to-r ${theme.colors.primary} shadow-lg hover:shadow-xl
+                  transform hover:scale-105 transition-all duration-200
+                `}
+              >
+                <Plus className="w-5 h-5 mr-2" />
+                Add Expense
+              </a>
+              <a 
+                href={`/app/${currentGroup}/reports`}
+                className={`
+                  inline-flex items-center px-6 py-3 rounded-xl font-medium
+                  ${theme.colors.cardBg} ${theme.colors.text} ${theme.colors.cardHover}
+                  border-2 ${theme.colors.border} shadow-lg hover:shadow-xl
+                  transform hover:scale-105 transition-all duration-200
+                `}
+              >
+                <Eye className="w-5 h-5 mr-2" />
+                View Reports
+              </a>
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Stats */}
+        <div className="mb-8">
+          <QuickStatsGrid expenses={expenses} users={users} categories={categories} />
+        </div>
+
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 mb-8">
+          {/* Recent Expenses */}
+          <div className="xl:col-span-2">
+            <Card className={`${theme.colors.cardBg} border-2 ${theme.colors.border} shadow-xl`}>
+              <div className="flex items-center justify-between mb-6">
+                <h3 className={`text-xl font-bold ${theme.colors.text} flex items-center`}>
+                  <Activity className="w-6 h-6 mr-3 text-indigo-600" />
+                  Recent Expenses
+                </h3>
+                <a 
+                  href={`/app/${currentGroup}/expenses`}
+                  className={`text-indigo-600 hover:text-indigo-800 text-sm font-medium flex items-center transition-colors`}
+                >
+                  View All
+                  <ArrowUpRight className="w-4 h-4 ml-1" />
+                </a>
+              </div>
+              
+              {recentExpenses.length === 0 ? (
+                <div className="text-center py-12">
+                  <DollarSign className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+                  <h4 className={`text-lg font-medium ${theme.colors.textMuted} mb-2`}>No expenses yet</h4>
+                  <p className={`${theme.colors.textMuted} mb-4`}>Start by adding your first expense</p>
+                  <a 
+                    href={`/app/${currentGroup}/add`}
+                    className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl font-medium hover:shadow-lg transition-all duration-200"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add First Expense
+                  </a>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {recentExpenses.map(expense => (
+                    <div 
+                      key={expense._id} 
+                      className={`
+                        flex justify-between items-center p-4 rounded-xl border-2
+                        ${theme.colors.surface} ${theme.colors.border} ${theme.colors.hoverBg}
+                        transition-all duration-200 hover:shadow-md
+                      `}
+                    >
+                      <div className="flex items-center">
+                        <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center mr-4">
+                          <DollarSign className="w-5 h-5 text-white" />
+                        </div>
+                        <div>
+                          <p className={`font-semibold ${theme.colors.text}`}>
+                            {expense.notes || 'No description'}
+                          </p>
+                          <div className="flex items-center space-x-2 text-sm">
+                            <span className={`${theme.colors.textMuted}`}>
+                              {expense.category?.name || 'Uncategorized'}
+                            </span>
+                            <span className={`${theme.colors.textMuted}`}>•</span>
+                            <span className={`${theme.colors.textMuted}`}>
+                              {expense.paidBy?.name || 'Unknown'}
+                            </span>
+                            <span className={`${theme.colors.textMuted}`}>•</span>
+                            <span className={`${theme.colors.textMuted}`}>
+                              {new Date(expense.date).toLocaleDateString()}
+                            </span>
+                          </div>
+                        </div>
                       </div>
                       <div className="text-right">
-                        <p className="font-bold text-gray-800">₹{expense.amount}</p>
-                        <p className="text-xs text-gray-500">{new Date(expense.date).toLocaleDateString()}</p>
+                        <p className={`font-bold text-xl ${theme.colors.text}`}>
+                          ₹{expense.amount.toLocaleString()}
+                        </p>
                       </div>
                     </div>
                   ))}
                 </div>
-              </Card>
+              )}
+            </Card>
+          </div>
 
-              <Card>
-                <ExpenseSplitting key={`splitting-${refreshKey}`} />
-              </Card>
-            </div>
-
-            <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-xl p-6">
-              <h3 className="font-semibold text-blue-800 mb-3 flex items-center">
-                <TrendingUp className="w-5 h-5 mr-2" />
-                🚀 Getting Started Guide
+          {/* Balance Summary */}
+          <div>
+            <Card className={`${theme.colors.cardBg} border-2 ${theme.colors.border} shadow-xl`}>
+              <h3 className={`text-xl font-bold ${theme.colors.text} mb-6 flex items-center`}>
+                <Users className="w-6 h-6 mr-3 text-green-600" />
+                Balance Summary
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <h4 className="font-medium text-blue-700">Set Up Your Group</h4>
-                  <ul className="text-sm text-blue-600 space-y-1">
-                    <li>• Add members in the "Group Members" tab</li>
-                    <li>• Create expense categories in the "Categories" tab</li>
+              <ExpenseSplitting key={`splitting-${refreshKey}`} />
+            </Card>
+          </div>
+        </div>
+
+        {/* Analytics Section */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-8">
+          <Card className={`${theme.colors.cardBg} border-2 ${theme.colors.border} shadow-xl`}>
+            <MonthlyExpenseChart expenses={expenses} />
+          </Card>
+          <Card className={`${theme.colors.cardBg} border-2 ${theme.colors.border} shadow-xl`}>
+            <ExpensePieChart expenses={expenses} categories={categories} />
+          </Card>
+        </div>
+
+        {/* Category Breakdown */}
+        <Card className={`${theme.colors.cardBg} border-2 ${theme.colors.border} shadow-xl mb-8`}>
+          <ExpenseByCategory expenses={expenses} categories={categories} />
+        </Card>
+
+        {/* Getting Started Guide (only show if no expenses) */}
+        {expenses.length === 0 && (
+          <Card className={`${theme.colors.glass} border-2 border-indigo-200 dark:border-indigo-800 shadow-xl`}>
+            <div className="text-center">
+              <div className="w-16 h-16 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <TrendingUp className="w-8 h-8 text-white" />
+              </div>
+              <h3 className={`text-2xl font-bold ${theme.colors.text} mb-4`}>
+                🚀 Welcome to Your Expense Tracker!
+              </h3>
+              <p className={`${theme.colors.textSecondary} mb-8 max-w-2xl mx-auto`}>
+                Get started by setting up your group and adding your first expense. 
+                Track spending, split bills, and manage group finances with ease.
+              </p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+                <div className={`p-6 rounded-xl ${theme.colors.surface} border-2 ${theme.colors.border}`}>
+                  <Calendar className="w-8 h-8 text-blue-600 mx-auto mb-4" />
+                  <h4 className={`font-semibold ${theme.colors.text} mb-2`}>Set Up Your Group</h4>
+                  <ul className={`text-sm ${theme.colors.textSecondary} text-left space-y-1`}>
+                    <li>• Add members to your group</li>
+                    <li>• Create expense categories</li>
+                    <li>• Share group code with others</li>
                   </ul>
                   {groupMeta && (
-                    <div className="mt-3 text-xs bg-blue-50 border border-blue-200 text-blue-700 px-3 py-2 rounded-md inline-flex items-center gap-3">
-                      <span><strong>Group Code:</strong> {groupMeta.code}</span>
-                      <button onClick={()=> navigator.clipboard.writeText(groupMeta.code)} className="underline">Copy</button>
+                    <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <span className={`text-sm font-medium ${theme.colors.text}`}>
+                          Group Code: <strong>{groupMeta.code}</strong>
+                        </span>
+                        <button 
+                          onClick={() => navigator.clipboard.writeText(groupMeta.code)}
+                          className="text-blue-600 hover:text-blue-800 text-sm underline"
+                        >
+                          Copy
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
-                <div className="space-y-2">
-                  <h4 className="font-medium text-blue-700">Track & Manage</h4>
-                  <ul className="text-sm text-blue-600 space-y-1">
-                    <li>• Start adding expenses with automatic splitting</li>
-                    <li>• Monitor balances and settle up regularly</li>
+                
+                <div className={`p-6 rounded-xl ${theme.colors.surface} border-2 ${theme.colors.border}`}>
+                  <Activity className="w-8 h-8 text-green-600 mx-auto mb-4" />
+                  <h4 className={`font-semibold ${theme.colors.text} mb-2`}>Track & Manage</h4>
+                  <ul className={`text-sm ${theme.colors.textSecondary} text-left space-y-1`}>
+                    <li>• Add expenses with automatic splitting</li>
+                    <li>• Monitor balances and debts</li>
+                    <li>• Generate detailed reports</li>
                   </ul>
+                  <div className="mt-4">
+                    <a 
+                      href={`/app/${currentGroup}/add`}
+                      className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg font-medium text-sm hover:shadow-lg transition-all duration-200"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Your First Expense
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        );
-
-      case 'analytics':
-        return (
-          <div className="space-y-8">
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-              <Card>
-                <MonthlyExpenseChart expenses={expenses} />
-              </Card>
-              <Card>
-                <ExpensePieChart expenses={expenses} categories={categories} />
-              </Card>
-            </div>
-            <Card>
-              <ExpenseByCategory expenses={expenses} categories={categories} />
-            </Card>
-          </div>
-        );
-
-      case 'members':
-        return <GroupMembersManager key={`members-${refreshKey}`} />;
-      case 'add-expense':
-        return <AddExpense onExpenseAdded={handleExpenseAdded} />;
-      case 'expenses':
-        return <ExpenseList key={`expenses-${refreshKey}`} />;
-      case 'categories':
-        return <CategoryManager />;
-      default:
-        return null;
-    }
-  };
-
-  return (
-    <GradientBackground className="min-h-screen">
-      {/* Enhanced Tab Navigation */}
-      <div className="bg-white shadow-lg border-b sticky top-16 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex space-x-1 overflow-x-auto py-4">
-            {tabs.map(tab => {
-              const isActive = activeTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`
-                    flex items-center space-x-2 px-6 py-3 rounded-xl font-medium text-sm
-                    transition-all duration-300 whitespace-nowrap min-w-fit
-                    ${isActive 
-                      ? `bg-gradient-to-r ${tab.color} text-white shadow-lg transform scale-105` 
-                      : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
-                    }
-                  `}
-                >
-                  <tab.icon className="w-4 h-4" />
-                  <span>{tab.label}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-
-      {/* Content Area */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {renderTabContent()}
+          </Card>
+        )}
       </div>
     </GradientBackground>
   );

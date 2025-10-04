@@ -8,6 +8,7 @@ import Categories from './pages/Categories';
 import { GradientBackground } from './components/UI/Components';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
+import { ThemeProvider } from './context/ThemeContext';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import GroupSelect from './pages/GroupSelect';
@@ -57,48 +58,50 @@ const Protected = ({ children }) => {
 
 function App() {
   return (
-    <AuthProvider>
-      <ToastProvider>
-      <Router>
-        <div className="min-h-screen">
-          <Navbar />
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/welcome/group" element={<Protected><WelcomeGroup /></Protected>} />
-            <Route path="/select-group" element={<Protected><GroupSelect /></Protected>} />
-            <Route path="/invite/:token" element={<Protected><InviteAcceptPage /></Protected>} />
-            <Route path="/app/:groupId/dashboard" element={<Protected><Dashboard /></Protected>} />
-            <Route path="/" element={<Protected><Dashboard /></Protected>} />
-            {/* Group-scoped feature routes */}
-            <Route path="/app/:groupId/add" element={
-              <Protected>
-                <GradientBackground className="min-h-screen py-8">
-                  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <AddExpense />
-                  </div>
-                </GradientBackground>
-              </Protected>
-            } />
-            <Route path="/app/:groupId/reports" element={<Protected><Reports /></Protected>} />
-            <Route path="/app/:groupId/categories" element={
-              <Protected>
-                <GradientBackground className="min-h-screen py-8">
-                  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <Categories />
-                  </div>
-                </GradientBackground>
-              </Protected>
-            } />
-            {/* Backwards-compatible non-group paths: delegate to Protected which will redirect */}
-            <Route path="/add" element={<Protected><Navigate to="/" replace /></Protected>} />
-            <Route path="/categories" element={<Protected><Navigate to="/" replace /></Protected>} />
-            <Route path="/reports" element={<Protected><Navigate to="/" replace /></Protected>} />
-          </Routes>
-        </div>
-      </Router>
-      </ToastProvider>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <ToastProvider>
+          <Router>
+            <div className="min-h-screen transition-colors duration-200">
+              <Navbar />
+              <Routes>
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/welcome/group" element={<Protected><WelcomeGroup /></Protected>} />
+                <Route path="/select-group" element={<Protected><GroupSelect /></Protected>} />
+                <Route path="/invite/:token" element={<Protected><InviteAcceptPage /></Protected>} />
+                <Route path="/app/:groupId/dashboard" element={<Protected><Dashboard /></Protected>} />
+                <Route path="/" element={<Protected><Dashboard /></Protected>} />
+                {/* Group-scoped feature routes */}
+                <Route path="/app/:groupId/add" element={
+                  <Protected>
+                    <GradientBackground className="min-h-screen py-8">
+                      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <AddExpense />
+                      </div>
+                    </GradientBackground>
+                  </Protected>
+                } />
+                <Route path="/app/:groupId/reports" element={<Protected><Reports /></Protected>} />
+                <Route path="/app/:groupId/categories" element={
+                  <Protected>
+                    <GradientBackground className="min-h-screen py-8">
+                      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <Categories />
+                      </div>
+                    </GradientBackground>
+                  </Protected>
+                } />
+                {/* Backwards-compatible non-group paths: delegate to Protected which will redirect */}
+                <Route path="/add" element={<Protected><Navigate to="/" replace /></Protected>} />
+                <Route path="/categories" element={<Protected><Navigate to="/" replace /></Protected>} />
+                <Route path="/reports" element={<Protected><Navigate to="/" replace /></Protected>} />
+              </Routes>
+            </div>
+          </Router>
+        </ToastProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 

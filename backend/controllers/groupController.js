@@ -196,3 +196,76 @@ exports.acceptInvite = async (req, res) => {
     res.status(400).json({ message: err.message, code: 'INVITE_ACCEPT_FAILED' });
   }
 };
+
+// Delete group (admin only)
+exports.deleteGroup = async (req, res) => {
+  try {
+    const { groupId } = req.params;
+    const group = await Group.findById(groupId);
+    if (!group) return res.status(404).json({ message: 'Group not found', code: 'GROUP_NOT_FOUND' });
+    
+    // Check if user is admin
+    const userMembership = group.members.find(m => String(m.user) === String(req.user._id));
+    if (!userMembership || userMembership.role !== 'admin') {
+      return res.status(403).json({ message: 'Only group admins can delete groups', code: 'ADMIN_REQUIRED' });
+    }
+    
+    // Remove group from all users' memberships
+    const userIds = group.members.map(m => m.user);
+    await User.updateMany(
+      { _id: { $in: userIds } },
+      { $pull: { memberships: { group: groupId } } }
+    );
+    
+    // Delete related data
+    await Category.deleteMany({ group: groupId });
+    await Invite.deleteMany({ group: groupId });
+    
+    // Note: You might want to keep expenses for audit purposes
+    // or add a soft delete mechanism instead
+    
+    // Delete the group
+    await Group.findByIdAndDelete(groupId);
+    
+    res.json({ message: 'Group deleted successfully' });
+  } catch (err) {
+    res.status(400).json({ message: err.message, code: 'GROUP_DELETE_FAILED' });
+  }
+};
+
+// Leave group
+exports.leaveGroup = async (req, res) => {
+  try {
+    const { groupId } = req.params;
+    const group = await Group.findById(groupId);
+    if (!group) return res.status(404).json({ message: 'Group not found', code: 'GROUP_NOT_FOUND' });
+    
+    // Check if user is a member
+    const userMembership = group.members.find(m => String(m.user) === String(req.user._id));
+    if (!userMembership) {
+      return res.status(403).json({ message: 'You are not a member of this group', code: 'NOT_MEMBER' });
+    }
+    
+    // Check if user is the only admin
+    const admins = group.members.filter(m => m.role === 'admin');
+    if (userMembership.role === 'admin' && admins.length === 1) {
+      return res.status(400).json({ 
+        message: 'Cannot leave group as the only admin. Transfer admin rights or delete the group.', 
+        code: 'ONLY_ADMIN' 
+      });
+    }
+    
+    // Remove user from group
+    group.members = group.members.filter(m => String(m.user) !== String(req.user._id));
+    await group.save();
+    
+    // Remove group from user's memberships
+    await User.findByIdAndUpdate(req.user._id, {
+      $pull: { memberships: { group: groupId } }
+    });
+    
+    res.json({ message: 'Left group successfully' });
+  } catch (err) {
+    res.status(400).json({ message: err.message, code: 'LEAVE_GROUP_FAILED' });
+  }
+};

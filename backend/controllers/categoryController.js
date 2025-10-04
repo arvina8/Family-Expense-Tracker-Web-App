@@ -4,6 +4,11 @@ exports.createCategory = async (req, res) => {
   try {
     const { name, group } = req.body;
     if (!name || !group) return res.status(400).json({ error: 'name and group are required' });
+    
+    // Verify user is member of the group
+    const isMember = req.user.memberships?.some(m => String(m.group?._id || m.group) === String(group));
+    if (!isMember) return res.status(403).json({ error: 'Forbidden: not a group member' });
+    
     const category = new Category({ name, group });
     await category.save();
     res.status(201).json(category);
@@ -15,8 +20,13 @@ exports.createCategory = async (req, res) => {
 exports.getCategories = async (req, res) => {
   try {
     const { groupId } = req.query;
-    const query = groupId ? { group: groupId } : {};
-    const categories = await Category.find(query);
+    if (!groupId) return res.status(400).json({ error: 'groupId is required' });
+    
+    // Verify user is member of the group
+    const isMember = req.user.memberships?.some(m => String(m.group?._id || m.group) === String(groupId));
+    if (!isMember) return res.status(403).json({ error: 'Forbidden: not a group member' });
+    
+    const categories = await Category.find({ group: groupId });
     res.json(categories);
   } catch (err) {
     res.status(500).json({ error: err.message });
