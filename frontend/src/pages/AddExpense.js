@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import client from '../api/client';
+import { useAuth } from '../context/AuthContext';
 import { Card, Button } from '../components/UI/Components';
 import { Plus, Users, AlertCircle, Calculator, Calendar } from 'lucide-react';
 
@@ -10,18 +11,21 @@ const AddExpense = ({ onExpenseAdded }) => {
   const [date, setDate] = useState('');
   const [paidBy, setPaidBy] = useState('');
   const [users, setUsers] = useState([]);
-  const [description, setDescription] = useState('');
+  const [notes, setNotes] = useState('');
   const [splitType, setSplitType] = useState('even'); // 'even' or 'custom'
   const [customSplit, setCustomSplit] = useState([]);
 
+  const { currentGroup } = useAuth();
+
   useEffect(() => {
+    if (!currentGroup) return;
     fetchCategories();
     fetchUsers();
-  }, []);
+  }, [currentGroup]);
 
   const fetchCategories = async () => {
     try {
-      const res = await axios.get('/api/categories');
+  const res = await client.get('/categories', { params: { groupId: currentGroup } });
       setCategories(res.data);
     } catch (error) {
       console.error('Error fetching categories:', error);
@@ -30,10 +34,12 @@ const AddExpense = ({ onExpenseAdded }) => {
 
   const fetchUsers = async () => {
     try {
-      const res = await axios.get('/api/users');
-      setUsers(res.data);
+  const res = await client.get('/groups/mine');
+  const g = res.data.find(m => m.group._id === currentGroup);
+  const members = g ? g.group.members.map(m => m.user) : [];
+  setUsers(members);
       // Initialize custom split with all users at 0 ratio
-      setCustomSplit(res.data.map(user => ({ user: user._id, ratio: 0 })));
+  setCustomSplit(members.map(user => ({ user: user._id, ratio: 0 })));
     } catch (error) {
       console.error('Error fetching users:', error);
     }
@@ -58,8 +64,9 @@ const AddExpense = ({ onExpenseAdded }) => {
       amount: parseFloat(amount), 
       category, 
       date, 
-      paidBy, 
-      description 
+  group: currentGroup,
+  paidBy, 
+  notes 
     };
 
     // Add split information based on split type
@@ -79,13 +86,13 @@ const AddExpense = ({ onExpenseAdded }) => {
     }
 
     try {
-      await axios.post('/api/expenses', expenseData);
+  await client.post('/expenses', expenseData);
       // Reset form
       setAmount(''); 
       setCategory(''); 
       setDate(''); 
       setPaidBy(''); 
-      setDescription('');
+  setNotes('');
       setSplitType('even');
       setCustomSplit(users.map(user => ({ user: user._id, ratio: 0 })));
       
@@ -103,7 +110,7 @@ const AddExpense = ({ onExpenseAdded }) => {
           <Plus className="w-8 h-8 mr-3 text-blue-600" />
           Add New Expense
         </h1>
-        <p className="text-gray-600">Track and split expenses with your family members</p>
+  <p className="text-gray-600">Track and split expenses with your group members</p>
       </div>
 
       <Card className="max-w-2xl mx-auto">
@@ -111,15 +118,15 @@ const AddExpense = ({ onExpenseAdded }) => {
           <div className="mb-6 p-4 bg-red-50 border-2 border-red-200 rounded-xl">
             <div className="flex items-center mb-2">
               <AlertCircle className="w-5 h-5 text-red-600 mr-2" />
-              <div className="text-red-800 font-medium">No Family Members Found</div>
+              <div className="text-red-800 font-medium">No Group Members Found</div>
             </div>
             <div className="text-red-700 text-sm mb-3">
-              You need to add family members before creating expenses. 
+              You need to add group members before creating expenses. 
             </div>
             <Button variant="danger" size="sm">
-              <a href="/family" className="flex items-center">
+              <a href="/select-group" className="flex items-center">
                 <Users className="w-4 h-4 mr-2" />
-                Add Family Members First
+                Add Group Members First
               </a>
             </Button>
           </div>
@@ -206,7 +213,7 @@ const AddExpense = ({ onExpenseAdded }) => {
                 required
                 disabled={users.length === 0}
               >
-                <option value="">{users.length === 0 ? 'No family members available' : 'Select who paid'}</option>
+                <option value="">{users.length === 0 ? 'No group members available' : 'Select who paid'}</option>
                 {users.map(user => (
                   <option key={user._id} value={user._id}>{user.name}</option>
                 ))}
@@ -216,14 +223,14 @@ const AddExpense = ({ onExpenseAdded }) => {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Description (optional)
+              Notes (optional)
             </label>
             <input 
               type="text" 
               placeholder="What was this expense for?" 
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
-              value={description} 
-              onChange={e => setDescription(e.target.value)} 
+              value={notes} 
+              onChange={e => setNotes(e.target.value)} 
             />
           </div>
 
@@ -319,7 +326,7 @@ const AddExpense = ({ onExpenseAdded }) => {
             disabled={users.length === 0 || categories.length === 0}
           >
             {users.length === 0 || categories.length === 0 
-              ? 'Please add family members and categories first' 
+              ? 'Please add group members and categories first' 
               : 'Add Expense'
             }
           </Button>

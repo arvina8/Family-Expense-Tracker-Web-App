@@ -86,7 +86,7 @@ export const QuickStatsGrid = ({ expenses, users, categories }) => {
         color="green"
       />
       <StatsCard
-        title="Family Members"
+  title="Group Members"
         value={users.length}
         icon={Users}
         color="purple"

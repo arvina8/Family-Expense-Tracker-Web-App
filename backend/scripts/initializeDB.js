@@ -11,19 +11,19 @@ async function initializeDatabase() {
     // Check if users already exist
     const userCount = await User.countDocuments();
     if (userCount === 0) {
-      console.log('No users found. Creating default family members...');
+  console.log('No users found. Creating sample group users...');
       
       const defaultUsers = [
-        { name: 'Dad', email: 'dad@family.com', password: 'defaultpass123' },
-        { name: 'Mom', email: 'mom@family.com', password: 'defaultpass123' },
-        { name: 'Child 1', email: 'child1@family.com', password: 'defaultpass123' },
-        { name: 'Child 2', email: 'child2@family.com', password: 'defaultpass123' }
+        { name: 'Alice', email: 'alice@example.com', password: 'defaultpass123' },
+        { name: 'Bob', email: 'bob@example.com', password: 'defaultpass123' },
+        { name: 'Charlie', email: 'charlie@example.com', password: 'defaultpass123' },
+        { name: 'Dana', email: 'dana@example.com', password: 'defaultpass123' }
       ];
 
       await User.insertMany(defaultUsers);
-      console.log('✓ Default family members created');
+  console.log('✓ Sample users created');
     } else {
-      console.log(`✓ Found ${userCount} existing family members`);
+  console.log(`✓ Found ${userCount} existing users`);
     }
 
     // Check if categories already exist
@@ -51,7 +51,7 @@ async function initializeDatabase() {
     }
 
     console.log('\n🎉 Database initialization complete!');
-    console.log('Your Family Expense Tracker is ready to use.');
+  console.log('Your Group Expense Tracker backend is ready to use.');
     
   } catch (error) {
     console.error('Error initializing database:', error);

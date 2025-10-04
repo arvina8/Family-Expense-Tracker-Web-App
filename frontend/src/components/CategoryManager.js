@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import client from '../api/client';
+import { useAuth } from '../context/AuthContext';
 import { Card, Button, Badge } from './UI/Components';
 import { Tag, Plus, Edit, Trash2, Calendar, AlertCircle } from 'lucide-react';
 
@@ -10,14 +11,17 @@ const CategoryManager = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  const { currentGroup } = useAuth();
+
   useEffect(() => {
+    if (!currentGroup) return;
     fetchCategories();
-  }, []);
+  }, [currentGroup]);
 
   const fetchCategories = async () => {
     try {
       setLoading(true);
-      const res = await axios.get('/api/categories');
+  const res = await client.get('/categories', { params: { groupId: currentGroup } });
       setCategories(res.data);
     } catch (error) {
       console.error('Error fetching categories:', error);
@@ -29,7 +33,7 @@ const CategoryManager = () => {
   const handleCreate = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('/api/categories', newCategory);
+  await client.post('/categories', { ...newCategory, group: currentGroup });
       setNewCategory({ name: '' });
       setShowAddForm(false);
       fetchCategories();
@@ -45,7 +49,7 @@ const CategoryManager = () => {
   const handleUpdate = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`/api/categories/${editingCategory._id}`, editingCategory);
+      await client.put(`/categories/${editingCategory._id}`, { name: editingCategory.name });
       setEditingCategory(null);
       fetchCategories();
     } catch (error) {
@@ -56,7 +60,7 @@ const CategoryManager = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this category? This may affect existing expenses.')) {
       try {
-        await axios.delete(`/api/categories/${id}`);
+  await client.delete(`/categories/${id}`);
         fetchCategories();
       } catch (error) {
         console.error('Error deleting category:', error);
@@ -73,7 +77,7 @@ const CategoryManager = () => {
   const addDefaultCategories = async () => {
     try {
       for (const categoryName of defaultCategories) {
-        await axios.post('/api/categories', { name: categoryName });
+        await client.post('/categories', { name: categoryName, group: currentGroup });
       }
       fetchCategories();
     } catch (error) {

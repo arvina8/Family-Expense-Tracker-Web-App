@@ -1,6 +1,6 @@
-# Family Expense Tracker - Backend API
+# Group Expense Tracker - Backend API
 
-This is the backend API server for the Family Expense Tracker application, built with Node.js, Express.js, and MongoDB.
+This is the backend API server for the Group Expense Tracker application (multi-group, JWT-secured), built with Node.js, Express.js, and MongoDB.
 
 ## 🚀 Quick Start
 
@@ -26,13 +26,7 @@ This is the backend API server for the Family Expense Tracker application, built
    # Linux: sudo systemctl start mongod
    ```
 
-3. **Initialize database**
-
-   ```bash
-   npm run init
-   ```
-
-4. **Start development server**
+3. **Start development server**
    ```bash
    npm run dev
    ```
@@ -42,19 +36,24 @@ This is the backend API server for the Family Expense Tracker application, built
 ```
 backend/
 ├── controllers/           # Business logic
+│   ├── authController.js
+│   ├── groupController.js
 │   ├── expenseController.js
 │   ├── categoryController.js
 │   └── userController.js
+├── middleware/
+│   └── auth.js
 ├── models/               # Mongoose schemas
+│   ├── Group.js
 │   ├── Expense.js
 │   ├── Category.js
 │   └── User.js
 ├── routes/               # API routes
+│   ├── authRoutes.js
+│   ├── groupRoutes.js
 │   ├── expenseRoutes.js
 │   ├── categoryRoutes.js
 │   └── userRoutes.js
-├── scripts/              # Utility scripts
-│   └── initializeDB.js
 ├── .env                  # Environment variables
 ├── server.js            # Entry point
 └── package.json
@@ -62,21 +61,27 @@ backend/
 
 ## 🔌 API Endpoints
 
-### Family Members
+### Auth
 
-- `GET /api/users` - Get all family members
-- `POST /api/users` - Add new family member
-- `PUT /api/users/:id` - Update family member
-- `DELETE /api/users/:id` - Delete family member
+- `POST /api/auth/register` - Register new account
+- `POST /api/auth/login` - Login and get JWT token
+- `GET /api/auth/me` - Get current user details and groups
 
-### Categories
+### Groups
+
+- `POST /api/groups` - Create group (auth)
+- `GET /api/groups/mine` - List my groups (auth)
+- `POST /api/groups/:groupId/members` - Add member by email (admin)
+- `DELETE /api/groups/:groupId/members` - Remove member by userId (admin)
+
+### Categories (group-scoped)
 
 - `GET /api/categories` - Get all categories
 - `POST /api/categories` - Add new category
 - `PUT /api/categories/:id` - Update category
 - `DELETE /api/categories/:id` - Delete category
 
-### Expenses
+### Expenses (group-scoped)
 
 - `GET /api/expenses` - Get all expenses
 - `POST /api/expenses` - Add new expense
@@ -92,6 +97,8 @@ backend/
 - **Mongoose** - ODM for MongoDB
 - **CORS** - Cross-origin resource sharing
 - **dotenv** - Environment variables
+- **jsonwebtoken** - JWT auth
+- **bcrypt** - Password hashing
 
 ## 🔧 Development
 
@@ -109,9 +116,10 @@ npm run setup  # Install dependencies and initialize database
 Create a `.env` file with:
 
 ```bash
-MONGO_URI=mongodb://localhost:27017/family-expense-tracker
+MONGO_URI=mongodb://localhost:27017/group-expense-tracker
 PORT=5000
 NODE_ENV=development
+JWT_SECRET=replace-with-a-strong-secret
 ```
 
 ## 🐛 Troubleshooting
@@ -136,7 +144,7 @@ NODE_ENV=development
 
 ---
 
-**Backend API ready to serve your family expense data! 🚀**
+**Backend API ready to serve your group expense data! 🚀**
 
 3. **Initialize database**
 
@@ -181,31 +189,19 @@ backend/
 
 ### Base URL
 
-```
 Local: http://localhost:5000/api
-```
 
-### Family Members (Users)
+### Auth
 
-| Method | Endpoint            | Description                   |
-| ------ | ------------------- | ----------------------------- |
-| GET    | `/users`            | Get all family members        |
-| POST   | `/users`            | Create new family member      |
-| GET    | `/users/:id`        | Get specific family member    |
-| PUT    | `/users/:id`        | Update family member          |
-| DELETE | `/users/:id`        | Delete family member          |
-| POST   | `/users/initialize` | Create default family members |
+| Method | Endpoint         | Description           |
+| ------ | ---------------- | --------------------- |
+| POST   | `/auth/register` | Register              |
+| POST   | `/auth/login`    | Login and get token   |
+| GET    | `/auth/me`       | Current user + groups |
 
-#### User Schema
+#### User Schema (simplified)
 
-```javascript
-{
-  name: String (required),
-  email: String (required, unique),
-  password: String (required),
-  createdAt: Date (default: now)
-}
-```
+name, email (unique), password (hashed), memberships: [{ group, role }]
 
 ### Categories
 
@@ -219,12 +215,7 @@ Local: http://localhost:5000/api
 
 #### Category Schema
 
-```javascript
-{
-  name: String (required, unique),
-  createdAt: Date (default: now)
-}
-```
+name, group
 
 ### Expenses
 
@@ -239,31 +230,18 @@ Local: http://localhost:5000/api
 
 #### Expense Schema
 
-```javascript
-{
-  amount: Number (required),
-  category: ObjectId (required, ref: 'Category'),
-  date: Date (required),
-  paidBy: ObjectId (required, ref: 'User'),
-  description: String (default: ''),
-  split: [{
-    user: ObjectId (required, ref: 'User'),
-    ratio: Number (required, 0-1)
-  }],
-  createdAt: Date (default: now)
-}
-```
+group, amount, category, date, paidBy, notes, split: [{ user, ratio }]
 
 ## 📝 API Usage Examples
 
-### Create Family Member
+### Register
 
 ```bash
-curl -X POST http://localhost:5000/api/users \
+curl -X POST http://localhost:5000/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{
-    "name": "John Doe",
-    "email": "john@family.com",
+    "name": "Jane",
+    "email": "jane@example.com",
     "password": "password123"
   }'
 ```
@@ -289,18 +267,18 @@ curl -X POST http://localhost:5000/api/expenses \
 ### Get Balance Calculations
 
 ```bash
-curl http://localhost:5000/api/expenses/balances
+curl -H "Authorization: Bearer <token>" "http://localhost:5000/api/expenses/balances?groupId=<id>"
 ```
 
 ## ⚙️ Configuration
 
 ### Environment Variables
 
-| Variable    | Description               | Default                                            |
-| ----------- | ------------------------- | -------------------------------------------------- |
-| `MONGO_URI` | MongoDB connection string | `mongodb://localhost:27017/family-expense-tracker` |
-| `PORT`      | Server port               | `5000`                                             |
-| `NODE_ENV`  | Environment mode          | `development`                                      |
+| Variable    | Description               | Default                                           |
+| ----------- | ------------------------- | ------------------------------------------------- |
+| `MONGO_URI` | MongoDB connection string | `mongodb://localhost:27017/group-expense-tracker` |
+| `PORT`      | Server port               | `5000`                                            |
+| `NODE_ENV`  | Environment mode          | `development`                                     |
 
 ### MongoDB Setup
 
@@ -417,7 +395,7 @@ describe("GET /api/users", () => {
 ### Relationships
 
 ```
-User (Family Member)
+User
 ├── Expense.paidBy (One-to-Many)
 └── Expense.split.user (Many-to-Many)
 
@@ -435,8 +413,8 @@ Expense
 ```javascript
 // Recommended indexes for performance
 User: { email: 1 }
-Category: { name: 1 }
-Expense: { date: -1, paidBy: 1, category: 1 }
+Category: { group: 1, name: 1 }
+Expense: { group: 1, date: -1, paidBy: 1, category: 1 }
 ```
 
 ## 🚀 Deployment
@@ -454,7 +432,7 @@ npm start
 
 ```bash
 NODE_ENV=production
-MONGO_URI=mongodb+srv://user:pass@cluster.mongodb.net/family-expense-tracker
+MONGO_URI=mongodb+srv://user:pass@cluster.mongodb.net/group-expense-tracker
 PORT=5000
 ```
 
@@ -486,10 +464,10 @@ node scripts/migrate.js
 
 ```bash
 # Backup
-mongodump --uri="mongodb://localhost:27017/family-expense-tracker"
+mongodump --uri="mongodb://localhost:27017/group-expense-tracker"
 
 # Restore
-mongorestore --uri="mongodb://localhost:27017/family-expense-tracker" dump/
+mongorestore --uri="mongodb://localhost:27017/group-expense-tracker" dump/
 ```
 
 ## 📞 Support
@@ -503,4 +481,4 @@ For backend-specific issues:
 
 ---
 
-**Backend API ready for family expense tracking! 🚀**
+**Backend API ready for group expense tracking! 🚀**

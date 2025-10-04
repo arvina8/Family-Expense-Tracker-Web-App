@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import client from '../api/client';
+import { useAuth } from '../context/AuthContext';
 import { Card, Badge } from './UI/Components';
 import { RefreshCw, TrendingUp, TrendingDown, DollarSign, Users, ArrowRightLeft } from 'lucide-react';
 
@@ -7,14 +8,17 @@ const ExpenseSplitting = () => {
   const [balances, setBalances] = useState({});
   const [loading, setLoading] = useState(true);
 
+  const { currentGroup } = useAuth();
+
   useEffect(() => {
+    if (!currentGroup) return;
     fetchBalances();
-  }, []);
+  }, [currentGroup]);
 
   const fetchBalances = async () => {
     try {
       setLoading(true);
-      const res = await axios.get('/api/expenses/balances');
+  const res = await client.get('/expenses/balances', { params: { groupId: currentGroup } });
       setBalances(res.data);
     } catch (error) {
       console.error('Error fetching balances:', error);

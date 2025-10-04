@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import client from '../api/client';
+import { useAuth } from '../context/AuthContext';
 import { Card, Button } from './UI/Components';
 import { Edit, Trash2, Search, SortAsc, SortDesc, Calendar } from 'lucide-react';
 
@@ -13,15 +14,18 @@ const ExpenseList = () => {
   const [sortOrder, setSortOrder] = useState('desc');
   const [filterCategory, setFilterCategory] = useState('all');
 
+  const { currentGroup } = useAuth();
+
   useEffect(() => {
+    if (!currentGroup) return;
     fetchExpenses();
     fetchCategories();
     fetchUsers();
-  }, []);
+  }, [currentGroup]);
 
   const fetchExpenses = async () => {
     try {
-      const res = await axios.get('/api/expenses');
+  const res = await client.get('/expenses', { params: { groupId: currentGroup } });
       setExpenses(res.data);
     } catch (error) {
       console.error('Error fetching expenses:', error);
@@ -30,7 +34,7 @@ const ExpenseList = () => {
 
   const fetchCategories = async () => {
     try {
-      const res = await axios.get('/api/categories');
+  const res = await client.get('/categories', { params: { groupId: currentGroup } });
       setCategories(res.data);
     } catch (error) {
       console.error('Error fetching categories:', error);
@@ -39,8 +43,9 @@ const ExpenseList = () => {
 
   const fetchUsers = async () => {
     try {
-      const res = await axios.get('/api/users');
-      setUsers(res.data);
+  const res = await client.get('/groups/mine');
+  const g = res.data.find(m => m.group._id === currentGroup);
+  setUsers(g ? g.group.members.map(m => m.user) : []);
     } catch (error) {
       console.error('Error fetching users:', error);
     }
@@ -56,7 +61,7 @@ const ExpenseList = () => {
   const handleUpdate = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`/api/expenses/${editingExpense._id}`, editingExpense);
+  await client.put(`/expenses/${editingExpense._id}`, editingExpense);
       setEditingExpense(null);
       fetchExpenses();
     } catch (error) {
@@ -67,7 +72,7 @@ const ExpenseList = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this expense?')) {
       try {
-        await axios.delete(`/api/expenses/${id}`);
+  await client.delete(`/expenses/${id}`);
         fetchExpenses();
       } catch (error) {
         console.error('Error deleting expense:', error);
@@ -85,7 +90,7 @@ const ExpenseList = () => {
 
   const filteredAndSortedExpenses = expenses
     .filter(expense => {
-      const matchesSearch = expense.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      const matchesSearch = expense.notes?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            expense.category?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            expense.paidBy?.name?.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesCategory = filterCategory === 'all' || expense.category?._id === filterCategory;
@@ -223,14 +228,14 @@ const ExpenseList = () => {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
                 <input
                   type="text"
-                  name="description"
-                  value={editingExpense.description || ''}
+                  name="notes"
+                  value={editingExpense.notes || ''}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Enter description..."
+                  placeholder="Enter notes..."
                 />
               </div>
               <div className="flex space-x-3">
@@ -300,7 +305,7 @@ const ExpenseList = () => {
                   </div>
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Description
+                  Notes
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
@@ -326,7 +331,7 @@ const ExpenseList = () => {
                   </td>
                   <td className="px-6 py-4">
                     <div className="text-sm text-gray-900 max-w-xs truncate">
-                      {expense.description || 'No description'}
+                      {expense.notes || 'No notes'}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">

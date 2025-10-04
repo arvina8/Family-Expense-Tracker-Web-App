@@ -4,7 +4,9 @@ exports.createUser = async (req, res) => {
   try {
     const user = new User(req.body);
     await user.save();
-    res.status(201).json(user);
+    const safe = user.toObject();
+    delete safe.password;
+    res.status(201).json(safe);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -60,26 +62,4 @@ exports.deleteUser = async (req, res) => {
   }
 };
 
-exports.initializeDefaultUsers = async (req, res) => {
-  try {
-    const userCount = await User.countDocuments();
-    if (userCount > 0) {
-      return res.status(400).json({ error: 'Users already exist in the system' });
-    }
-
-    const defaultUsers = [
-      { name: 'Dad', email: 'dad@family.com', password: 'defaultpass123' },
-      { name: 'Mom', email: 'mom@family.com', password: 'defaultpass123' },
-      { name: 'Child 1', email: 'child1@family.com', password: 'defaultpass123' },
-      { name: 'Child 2', email: 'child2@family.com', password: 'defaultpass123' }
-    ];
-
-    const createdUsers = await User.insertMany(defaultUsers);
-    res.status(201).json({ 
-      message: 'Default family members created successfully',
-      users: createdUsers.map(user => ({ _id: user._id, name: user.name, email: user.email }))
-    });
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-};
+// initializeDefaultUsers removed in favor of auth/register

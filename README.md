@@ -1,143 +1,22 @@
-# Family Expense Tracker 💰
+# Group Expense Tracker 💰
 
-A comprehensive MERN stack web application for tracking and managing family expenses with intelligent splitting and balance calculations.
+A comprehensive MERN stack web application for tracking and managing group expenses with intelligent splitting, invitations, and multi-group membership.
 
-![Family Expense Tracker](https://img.shields.io/badge/MERN-Stack-blue)
-![License](https://img.shields.io/badge/license-ISC-green)
-![Node](https://img.shields.io/badge/Node.js-16%2B-brightgreen)
-![React](https://img.shields.io/badge/React-18-blue)
-![MongoDB](https://img.shields.io/badge/MongoDB-Database-green)
-
-## ✨ Features
-
-- 👨‍👩‍👧‍👦 **Family Member Management** - Add, edit, and manage family members
-- 💰 **Expense Tracking** - Create, edit, and delete expenses with full history
-- ⚖️ **Smart Expense Splitting** - Even split or custom ratios among family members
-- 📊 **Balance Calculations** - Real-time calculations showing who owes what to whom
-- 🏷️ **Category Management** - Organize expenses with customizable categories
-- 📱 **Responsive Design** - Seamless experience on desktop, tablet, and mobile
-- 🔄 **Real-time Updates** - Instant UI updates after any data modification
-- 🚀 **Quick Setup** - One-command database initialization with default data
-
-## 🚀 Quick Start
-
-### Prerequisites
-
-- **Node.js** (v16 or higher) - [Download here](https://nodejs.org/)
-- **MongoDB** (local installation) - [Setup Guide](https://docs.mongodb.com/manual/installation/)
-- **npm** package manager
-
-### Installation
-
-1. **Clone the repository**
-
-   ```bash
-   git clone https://github.com/vikranth2711/Family-Expense-Tracker-Web-App.git
-   cd Family-Expense-Tracker-Web-App
-   ```
-
-2. **Backend Setup**
-
-   ```bash
-   cd backend
-   npm install
-
-   # Start MongoDB (if not already running)
-   # Windows: Open MongoDB as a service or run mongod
-   # macOS: brew services start mongodb-community
-   # Linux: sudo systemctl start mongod
-
-   # Initialize database with default data
-   npm run init
-
-   # Start the backend server
-   npm start
-   ```
-
-3. **Frontend Setup** (in a new terminal)
-
-   ```bash
-   cd frontend
-   npm install
-   npm start
-   ```
-
-4. **Access the application**
-   - **Frontend**: http://localhost:3000
-   - **Backend API**: http://localhost:5000/api
-
-## 🎯 Default Setup
-
-The application comes pre-configured with:
-
-- **Default Family Members**: Dad, Mom, Child 1, Child 2
-- **Default Categories**: Food & Dining, Transportation, Utilities, Entertainment, Healthcare, Shopping, Education, Travel, Home & Garden, Other
-- **Sample Data**: Ready to use immediately after setup
-
-## 📖 Usage Guide
-
-### 1. First Time Setup
-
-1. Run `npm run init` in the backend directory
-2. Navigate to **Family Members** tab to manage your family
-3. Go to **Categories** tab to customize expense categories
-4. Start adding and tracking expenses!
-
-### 2. Adding Expenses
-
-1. Click **Add Expense** tab
-2. Fill in amount, select category, date, and who paid
-3. Choose split type:
-   - **Even Split**: Automatically divides equally among all family members
-   - **Custom Split**: Set specific ratios (must sum to 100%)
-
-### 3. Managing Data
-
-- **Edit Expenses**: Click "Edit" on any expense for inline editing
-- **Delete Expenses**: Click "Delete" with confirmation dialog
-- **Manage Categories**: Full CRUD operations for expense categories
-- **Manage Family**: Add, edit, or remove family members
-
-### 4. Viewing Balances
-
-- Navigate to **Split & Balance** tab
-- View detailed breakdown of who paid what and who owes what
-- Get clear settlement recommendations
-
-## 🛠️ Technology Stack
-
-### Backend
-
-- **Node.js** - Runtime environment
-- **Express.js** - Web application framework
-- **MongoDB** - NoSQL database
-- **Mongoose** - MongoDB object modeling
-- **dotenv** - Environment variable management
-- **CORS** - Cross-origin resource sharing
-
-### Frontend
-
-- **React 18** - UI library with hooks
-- **React Router v6** - Client-side routing
-- **Axios** - HTTP client for API calls
-- **Tailwind CSS** - Utility-first CSS framework
-- **React Scripts** - Build tools and development server
+![Group Expense Tracker](https://img.shields.io/badge/MERN-Stack-blue)
 
 ## 📁 Project Structure
-
-```
-Family-Expense-Tracker-Web-App/
-├── backend/                    # Express.js API server
-│   ├── controllers/           # Business logic
-│   │   ├── expenseController.js
-│   │   ├── categoryController.js
-│   │   └── userController.js
+- 👥 **Group Member Management** - Invite, add, and manage members per group
+- ⚖️ **Smart Expense Splitting** - Even split or custom ratios among group members
+- 📊 **Balance Calculations** - Real-time calculations showing who owes what across the group
+- 📨 **Invitations & Join Codes** - Invite by email or join via group code/ID
+- 🔐 **Authentication** - JWT-based login & registration
+- 🚀 **Quick Setup** - One-command database initialization with sample data
 │   ├── models/               # Mongoose schemas
 │   │   ├── Expense.js
 │   │   ├── Category.js
 │   │   └── User.js
 │   ├── routes/               # API routes
-│   │   ├── expenseRoutes.js
+- **Sample Users**: Alice, Bob, Charlie, Dana
 │   │   ├── categoryRoutes.js
 │   │   └── userRoutes.js
 │   ├── scripts/              # Utility scripts
@@ -145,75 +24,65 @@ Family-Expense-Tracker-Web-App/
 │   ├── .env                  # Environment variables
 │   ├── server.js            # Entry point
 │   └── package.json
+2. Navigate to the **Members** tab (in Dashboard) to manage your group
 ├── frontend/                  # React application
 │   ├── public/               # Static files
 │   ├── src/
 │   │   ├── components/       # Reusable components
 │   │   │   ├── ExpenseList.js
 │   │   │   ├── CategoryManager.js
-│   │   │   ├── FamilyManager.js
+│   │   │   ├── GroupMembersManager.js
 │   │   │   ├── ExpenseSplitting.js
 │   │   │   ├── Navbar.js
+- **Even Split**: Automatically divides equally among all members
 │   │   │   └── Modal.js
+- **Custom Split**: Set specific ratios (must sum to 100%)
 │   │   ├── pages/           # Page components
 │   │   │   ├── Dashboard.js
 │   │   │   ├── AddExpense.js
-│   │   │   ├── Categories.js
-│   │   │   ├── FamilyMembers.js
-│   │   │   └── Reports.js
-│   │   ├── App.js           # Main app component
+- **Manage Members**: Invite, add, or remove group members; view pending invites
 │   │   └── index.js         # Entry point
 │   ├── tailwind.config.js   # Tailwind configuration
 │   └── package.json
 ├── .gitignore               # Git ignore rules
 ├── README.md               # Project documentation
-├── FIXES_SUMMARY.md       # Implementation details
-└── IMPLEMENTATION_SUMMARY.md # Feature documentation
-```
+### Auth & Users
 
-## 🔌 API Endpoints
+- `POST /api/auth/register` - Register user
+- `POST /api/auth/login` - Login user
+- `GET /api/auth/me` - Current user + memberships
 
+### Groups
+- `POST /api/groups` - Create new group (creator admin)
+- `GET /api/groups/mine` - List my memberships
+- `GET /api/groups/:groupId` - Group detail (members + invites snapshot)
+- `POST /api/groups/join` - Join by id or code `{ groupIdOrCode }`
+- `POST /api/groups/:groupId/members` - Add existing user (admin)
+- `DELETE /api/groups/:groupId/members` - Remove member (admin)
+- `POST /api/groups/:groupId/invite` - Invite by email (admin)
+- `GET /api/groups/:groupId/invites` - Pending invites (admin)
+- `POST /api/groups/invites/:token/accept` - Accept invite
 ### Family Members
 
 - `GET /api/users` - Retrieve all family members
-- `POST /api/users` - Add new family member
-- `GET /api/users/:id` - Get specific family member
-- `PUT /api/users/:id` - Update family member
-- `DELETE /api/users/:id` - Remove family member
-- `POST /api/users/initialize` - Create default family members
 
 ### Categories
-
-- `GET /api/categories` - Retrieve all categories
-- `POST /api/categories` - Add new category
-- `GET /api/categories/:id` - Get specific category
-- `PUT /api/categories/:id` - Update category
-- `DELETE /api/categories/:id` - Delete category
 
 ### Expenses
 
 - `GET /api/expenses` - Retrieve all expenses
 - `POST /api/expenses` - Add new expense
 - `GET /api/expenses/:id` - Get specific expense
-- `PUT /api/expenses/:id` - Update expense
-- `DELETE /api/expenses/:id` - Delete expense
-- `GET /api/expenses/balances` - Get balance calculations
+- **Can't add expenses**: Ensure group members and categories exist
 
 ## 🔧 Development
 
-### Backend Development
-
-```bash
 cd backend
 npm run dev  # Uses nodemon for auto-restart on file changes
 ```
-
-### Frontend Development
-
 ```bash
-cd frontend
 npm start    # React development server with hot reload
-```
+**Made with ❤️ for groups who want to track expenses together!**
 
 ### Database Management
 
@@ -303,6 +172,6 @@ For support and questions:
 
 ---
 
-**Made with ❤️ for families who want to track expenses together!**
+**Made with ❤️ for groups who want to track expenses together!**
 
 ⭐ If you find this project helpful, please consider giving it a star on GitHub!

@@ -1,13 +1,16 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Home, Users, Plus, Tags, BarChart3, Wallet } from 'lucide-react';
+import GroupSwitcher from './GroupSwitcher';
+import TopRightMenu from './TopRightMenu';
+import { useAuth } from '../context/AuthContext';
 
 const Navbar = () => {
   const location = useLocation();
+  const { user, logout } = useAuth();
 
   const navItems = [
     { path: '/', label: 'Dashboard', icon: Home },
-    { path: '/family', label: 'Family', icon: Users },
     { path: '/add', label: 'Add Expense', icon: Plus },
     { path: '/categories', label: 'Categories', icon: Tags },
     { path: '/reports', label: 'Reports', icon: BarChart3 },
@@ -23,7 +26,7 @@ const Navbar = () => {
               <Wallet className="w-6 h-6 text-blue-600" />
             </div>
             <div className="text-white">
-              <h1 className="font-bold text-xl">Family Expense Tracker</h1>
+              <h1 className="font-bold text-xl">Group Expense Tracker</h1>
               <p className="text-blue-200 text-xs">Smart expense management</p>
             </div>
           </div>
@@ -50,6 +53,13 @@ const Navbar = () => {
                 </Link>
               );
             })}
+            <div className="ml-3">
+              <GroupSwitcher />
+            </div>
+            {user && <TopRightMenu />}
+            {!user && (
+              <Link className="ml-3 text-white hover:text-blue-200" to="/login">Login</Link>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -85,6 +95,9 @@ const Navbar = () => {
               </Link>
             );
           })}
+          <div className="pt-2">
+            <GroupSwitcher />
+          </div>
         </div>
       </div>
     </nav>

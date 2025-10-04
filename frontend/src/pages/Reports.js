@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import client from '../api/client';
+import { useAuth } from '../context/AuthContext';
 import { ExpenseByCategory, ExpensePieChart, MonthlyExpenseChart } from '../components/Charts/ExpenseChart';
 import { QuickStatsGrid } from '../components/UI/StatsCards';
 import { GradientBackground, Card } from '../components/UI/Components';
@@ -12,22 +13,24 @@ const Reports = () => {
   const [loading, setLoading] = useState(true);
   const [dateRange, setDateRange] = useState('all');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const { currentGroup } = useAuth();
 
   useEffect(() => {
+    if (!currentGroup) return;
     fetchData();
-  }, []);
+  }, [currentGroup]);
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [expensesRes, categoriesRes, usersRes] = await Promise.all([
-        axios.get('/api/expenses'),
-        axios.get('/api/categories'),
-        axios.get('/api/users')
+      const [expensesRes, categoriesRes, groupRes] = await Promise.all([
+        client.get('/expenses', { params: { groupId: currentGroup } }),
+        client.get('/categories', { params: { groupId: currentGroup } }),
+        client.get(`/groups/${currentGroup}`)
       ]);
       setExpenses(expensesRes.data);
       setCategories(categoriesRes.data);
-      setUsers(usersRes.data);
+      setUsers(groupRes.data.members?.map(m => m.user) ?? []);
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -85,7 +88,7 @@ const Reports = () => {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Expense Reports & Analytics</h1>
-          <p className="text-gray-600">Comprehensive insights into your family spending patterns</p>
+          <p className="text-gray-600">Comprehensive insights into your group spending patterns</p>
         </div>
 
         {/* Filters */}

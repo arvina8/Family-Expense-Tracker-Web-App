@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import client from '../api/client';
+import { useAuth } from '../context/AuthContext';
 import ExpenseList from '../components/ExpenseList';
 import CategoryManager from '../components/CategoryManager';
 import ExpenseSplitting from '../components/ExpenseSplitting';
-import FamilyManager from '../components/FamilyManager';
+import GroupMembersManager from '../components/GroupMembersManager';
 import AddExpense from './AddExpense';
 import { ExpenseByCategory, ExpensePieChart, MonthlyExpenseChart } from '../components/Charts/ExpenseChart';
 import { QuickStatsGrid } from '../components/UI/StatsCards';
@@ -13,26 +14,29 @@ import { TrendingUp, Users, PlusCircle, Eye, Settings, BarChart3 } from 'lucide-
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [refreshKey, setRefreshKey] = useState(0);
+  const { currentGroup } = useAuth();
   const [expenses, setExpenses] = useState([]);
   const [categories, setCategories] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!currentGroup) return;
     fetchData();
-  }, [refreshKey]);
+  }, [refreshKey, currentGroup]);
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [expensesRes, categoriesRes, usersRes] = await Promise.all([
-        axios.get('/api/expenses'),
-        axios.get('/api/categories'),
-        axios.get('/api/users')
+      const [expensesRes, categoriesRes, groupRes] = await Promise.all([
+        client.get('/expenses', { params: { groupId: currentGroup } }),
+        client.get('/categories', { params: { groupId: currentGroup } }),
+        client.get(`/groups/${currentGroup}`)
       ]);
       setExpenses(expensesRes.data);
       setCategories(categoriesRes.data);
-      setUsers(usersRes.data);
+      // Derive users from current group
+      setUsers(groupRes.data.members?.map(m => m.user) ?? []);
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -48,7 +52,7 @@ const Dashboard = () => {
   const tabs = [
     { id: 'overview', label: 'Overview', icon: TrendingUp, color: 'from-blue-500 to-blue-600' },
     { id: 'analytics', label: 'Analytics', icon: BarChart3, color: 'from-purple-500 to-purple-600' },
-    { id: 'family', label: 'Family Members', icon: Users, color: 'from-green-500 to-green-600' },
+  { id: 'members', label: 'Group Members', icon: Users, color: 'from-green-500 to-green-600' },
     { id: 'add-expense', label: 'Add Expense', icon: PlusCircle, color: 'from-orange-500 to-orange-600' },
     { id: 'expenses', label: 'All Expenses', icon: Eye, color: 'from-indigo-500 to-indigo-600' },
     { id: 'categories', label: 'Categories', icon: Settings, color: 'from-pink-500 to-pink-600' },
@@ -76,7 +80,7 @@ const Dashboard = () => {
                   {expenses.slice(0, 5).map(expense => (
                     <div key={expense._id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                       <div>
-                        <p className="font-medium text-gray-800">{expense.description || 'No description'}</p>
+                        <p className="font-medium text-gray-800">{expense.notes || 'No notes'}</p>
                         <p className="text-sm text-gray-600">{expense.category?.name} • {expense.paidBy?.name}</p>
                       </div>
                       <div className="text-right">
@@ -100,9 +104,9 @@ const Dashboard = () => {
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <h4 className="font-medium text-blue-700">Setup Your Family</h4>
+                  <h4 className="font-medium text-blue-700">Set Up Your Group</h4>
                   <ul className="text-sm text-blue-600 space-y-1">
-                    <li>• Add family members in the "Family Members" tab</li>
+                    <li>• Add members in the "Group Members" tab</li>
                     <li>• Create expense categories in the "Categories" tab</li>
                   </ul>
                 </div>
@@ -135,8 +139,8 @@ const Dashboard = () => {
           </div>
         );
 
-      case 'family':
-        return <FamilyManager key={`family-${refreshKey}`} />;
+      case 'members':
+        return <GroupMembersManager key={`members-${refreshKey}`} />;
       case 'add-expense':
         return <AddExpense onExpenseAdded={handleExpenseAdded} />;
       case 'expenses':
