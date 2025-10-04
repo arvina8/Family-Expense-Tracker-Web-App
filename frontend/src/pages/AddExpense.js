@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import client from '../api/client';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import { Card, Button } from '../components/UI/Components';
 import { Plus, Users, AlertCircle, Calculator, Calendar } from 'lucide-react';
 
@@ -16,6 +17,7 @@ const AddExpense = ({ onExpenseAdded }) => {
   const [customSplit, setCustomSplit] = useState([]);
 
   const { currentGroup } = useAuth();
+  const toast = useToast();
 
   useEffect(() => {
     if (!currentGroup) return;
@@ -73,7 +75,7 @@ const AddExpense = ({ onExpenseAdded }) => {
     if (splitType === 'custom') {
       const totalRatio = getTotalRatio();
       if (Math.abs(totalRatio - 1) > 0.001) {
-        alert('Custom split ratios must sum to 1.0 (100%)');
+        toast.error('Custom split ratios must sum to 1.0 (100%)');
         return;
       }
       expenseData.split = customSplit.filter(split => split.ratio > 0);
@@ -87,6 +89,7 @@ const AddExpense = ({ onExpenseAdded }) => {
 
     try {
   await client.post('/expenses', expenseData);
+  toast.success('Expense added');
       // Reset form
       setAmount(''); 
       setCategory(''); 
@@ -99,7 +102,7 @@ const AddExpense = ({ onExpenseAdded }) => {
       if (onExpenseAdded) onExpenseAdded();
     } catch (error) {
       console.error('Error adding expense:', error);
-      alert('Error adding expense. Please try again.');
+  toast.error('Error adding expense. Please try again.');
     }
   };
 

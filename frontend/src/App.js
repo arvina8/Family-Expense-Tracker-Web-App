@@ -7,6 +7,7 @@ import Reports from './pages/Reports';
 import Categories from './pages/Categories';
 import { GradientBackground } from './components/UI/Components';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ToastProvider } from './context/ToastContext';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import GroupSelect from './pages/GroupSelect';
@@ -57,6 +58,7 @@ const Protected = ({ children }) => {
 function App() {
   return (
     <AuthProvider>
+      <ToastProvider>
       <Router>
         <div className="min-h-screen">
           <Navbar />
@@ -95,6 +97,7 @@ function App() {
           </Routes>
         </div>
       </Router>
+      </ToastProvider>
     </AuthProvider>
   );
 }

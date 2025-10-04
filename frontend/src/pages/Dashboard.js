@@ -19,6 +19,7 @@ const Dashboard = () => {
   const [categories, setCategories] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [groupMeta, setGroupMeta] = useState(null);
 
   useEffect(() => {
     if (!currentGroup) return;
@@ -36,7 +37,8 @@ const Dashboard = () => {
       setExpenses(expensesRes.data);
       setCategories(categoriesRes.data);
       // Derive users from current group
-      setUsers(groupRes.data.members?.map(m => m.user) ?? []);
+  setUsers(groupRes.data.members?.map(m => m.user) ?? []);
+  setGroupMeta(groupRes.data);
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -109,6 +111,12 @@ const Dashboard = () => {
                     <li>• Add members in the "Group Members" tab</li>
                     <li>• Create expense categories in the "Categories" tab</li>
                   </ul>
+                  {groupMeta && (
+                    <div className="mt-3 text-xs bg-blue-50 border border-blue-200 text-blue-700 px-3 py-2 rounded-md inline-flex items-center gap-3">
+                      <span><strong>Group Code:</strong> {groupMeta.code}</span>
+                      <button onClick={()=> navigator.clipboard.writeText(groupMeta.code)} className="underline">Copy</button>
+                    </div>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <h4 className="font-medium text-blue-700">Track & Manage</h4>

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import client from '../api/client';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import { Card, Button, Badge } from './UI/Components';
 import { Users, UserPlus, Edit, Trash2, Mail, Calendar, AlertCircle, CheckCircle } from 'lucide-react';
 import AddMemberModal from './AddMemberModal';
@@ -15,6 +16,8 @@ const GroupMembersManager = () => {
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
   const [invitesRefreshKey, setInvitesRefreshKey] = useState(0);
   const { currentGroup } = useAuth();
+  const toast = useToast();
+  const [groupMeta, setGroupMeta] = useState(null);
 
   useEffect(() => {
     if (!currentGroup) return;
@@ -24,8 +27,9 @@ const GroupMembersManager = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const res = await client.get('/groups/' + currentGroup);
-      setUsers(res.data.members.map(m => ({ ...m.user, role: m.role })));
+  const res = await client.get('/groups/' + currentGroup);
+  setGroupMeta(res.data);
+  setUsers(res.data.members.map(m => ({ ...m.user, role: m.role })));
     } catch (error) {
       console.error('Error fetching users:', error);
     } finally {
@@ -41,8 +45,8 @@ const GroupMembersManager = () => {
       setShowAddForm(false);
       fetchUsers();
     } catch (error) {
-      console.error('Error creating user:', error);
-      alert('Error creating group member. Please check if email already exists.');
+  console.error('Error creating user:', error);
+  toast.error('Error creating group member. Check if email already exists.');
     }
   };
 
@@ -56,8 +60,8 @@ const GroupMembersManager = () => {
       setEditingUser(null); // reserved for future
       fetchUsers();
     } catch (error) {
-      console.error('Error updating user:', error);
-      alert('Error updating group member.');
+  console.error('Error updating user:', error);
+  toast.error('Error updating group member.');
     }
   };
 
@@ -67,8 +71,8 @@ const GroupMembersManager = () => {
         await client.delete(`/groups/${currentGroup}/members`, { data: { userId: id } });
         fetchUsers();
       } catch (error) {
-        console.error('Error deleting user:', error);
-        alert('Error deleting group member.');
+  console.error('Error deleting user:', error);
+  toast.error('Error deleting group member.');
       }
     }
   };
@@ -90,6 +94,22 @@ const GroupMembersManager = () => {
           Group Member Management
         </h1>
         <p className="text-gray-600">Manage your group members who will share expenses</p>
+        {groupMeta && (
+          <div className="mt-4 inline-flex items-center gap-3 bg-blue-50 border border-blue-200 rounded-lg px-4 py-2 text-sm text-blue-700">
+            <span><strong>Group Code:</strong> {groupMeta.code}</span>
+            <span className="hidden sm:inline"><strong>ID:</strong> {groupMeta._id}</span>
+            <button
+              type="button"
+              onClick={() => { navigator.clipboard.writeText(groupMeta.code); toast.info('Group code copied'); }}
+              className="text-blue-600 underline"
+            >Copy Code</button>
+            <button
+              type="button"
+              onClick={() => { navigator.clipboard.writeText(groupMeta._id); toast.info('Group id copied'); }}
+              className="text-blue-600 underline"
+            >Copy ID</button>
+          </div>
+        )}
       </div>
 
       {/* Actions */}
