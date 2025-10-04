@@ -5,47 +5,51 @@ A comprehensive MERN stack web application for tracking and managing group expen
 ![Group Expense Tracker](https://img.shields.io/badge/MERN-Stack-blue)
 
 ## 📁 Project Structure
+
 - 👥 **Group Member Management** - Invite, add, and manage members per group
 - ⚖️ **Smart Expense Splitting** - Even split or custom ratios among group members
 - 📊 **Balance Calculations** - Real-time calculations showing who owes what across the group
 - 📨 **Invitations & Join Codes** - Invite by email or join via group code/ID
 - 🔐 **Authentication** - JWT-based login & registration
 - 🚀 **Quick Setup** - One-command database initialization with sample data
-│   ├── models/               # Mongoose schemas
-│   │   ├── Expense.js
-│   │   ├── Category.js
-│   │   └── User.js
-│   ├── routes/               # API routes
+  │ ├── models/ # Mongoose schemas
+  │ │ ├── Expense.js
+  │ │ ├── Category.js
+  │ │ └── User.js
+  │ ├── routes/ # API routes
 - **Sample Users**: Alice, Bob, Charlie, Dana
-│   │   ├── categoryRoutes.js
-│   │   └── userRoutes.js
-│   ├── scripts/              # Utility scripts
-│   │   └── initializeDB.js
-│   ├── .env                  # Environment variables
-│   ├── server.js            # Entry point
-│   └── package.json
+  │ │ ├── categoryRoutes.js
+  │ │ └── userRoutes.js
+  │ ├── scripts/ # Utility scripts
+  │ │ └── initializeDB.js
+  │ ├── .env # Environment variables
+  │ ├── server.js # Entry point
+  │ └── package.json
+
 2. Navigate to the **Members** tab (in Dashboard) to manage your group
-├── frontend/                  # React application
-│   ├── public/               # Static files
-│   ├── src/
-│   │   ├── components/       # Reusable components
-│   │   │   ├── ExpenseList.js
-│   │   │   ├── CategoryManager.js
-│   │   │   ├── GroupMembersManager.js
-│   │   │   ├── ExpenseSplitting.js
-│   │   │   ├── Navbar.js
+   ├── frontend/ # React application
+   │ ├── public/ # Static files
+   │ ├── src/
+   │ │ ├── components/ # Reusable components
+   │ │ │ ├── ExpenseList.js
+   │ │ │ ├── CategoryManager.js
+   │ │ │ ├── GroupMembersManager.js
+   │ │ │ ├── ExpenseSplitting.js
+   │ │ │ ├── Navbar.js
+
 - **Even Split**: Automatically divides equally among all members
-│   │   │   └── Modal.js
+  │ │ │ └── Modal.js
 - **Custom Split**: Set specific ratios (must sum to 100%)
-│   │   ├── pages/           # Page components
-│   │   │   ├── Dashboard.js
-│   │   │   ├── AddExpense.js
+  │ │ ├── pages/ # Page components
+  │ │ │ ├── Dashboard.js
+  │ │ │ ├── AddExpense.js
 - **Manage Members**: Invite, add, or remove group members; view pending invites
-│   │   └── index.js         # Entry point
-│   ├── tailwind.config.js   # Tailwind configuration
-│   └── package.json
-├── .gitignore               # Git ignore rules
-├── README.md               # Project documentation
+  │ │ └── index.js # Entry point
+  │ ├── tailwind.config.js # Tailwind configuration
+  │ └── package.json
+  ├── .gitignore # Git ignore rules
+  ├── README.md # Project documentation
+
 ### Auth & Users
 
 - `POST /api/auth/register` - Register user
@@ -53,6 +57,7 @@ A comprehensive MERN stack web application for tracking and managing group expen
 - `GET /api/auth/me` - Current user + memberships
 
 ### Groups
+
 - `POST /api/groups` - Create new group (creator admin)
 - `GET /api/groups/mine` - List my memberships
 - `GET /api/groups/:groupId` - Group detail (members + invites snapshot)
@@ -62,6 +67,7 @@ A comprehensive MERN stack web application for tracking and managing group expen
 - `POST /api/groups/:groupId/invite` - Invite by email (admin)
 - `GET /api/groups/:groupId/invites` - Pending invites (admin)
 - `POST /api/groups/invites/:token/accept` - Accept invite
+
 ### Family Members
 
 - `GET /api/users` - Retrieve all family members
@@ -78,8 +84,9 @@ A comprehensive MERN stack web application for tracking and managing group expen
 ## 🔧 Development
 
 cd backend
-npm run dev  # Uses nodemon for auto-restart on file changes
-```
+npm run dev # Uses nodemon for auto-restart on file changes
+
+````
 ```bash
 npm start    # React development server with hot reload
 **Made with ❤️ for groups who want to track expenses together!**
@@ -90,7 +97,7 @@ npm start    # React development server with hot reload
 cd backend
 npm run init    # Reinitialize database with default data
 npm run setup   # Complete setup (install + initialize)
-```
+````
 
 ## 🐛 Troubleshooting
 
