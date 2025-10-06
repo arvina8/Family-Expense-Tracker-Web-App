@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { LogOut, Settings, Layers } from 'lucide-react';
 
 const TopRightMenu = () => {
-  const { user, logout, currentGroup } = useAuth();
+  const { user, logout, currentGroup, memberships } = useAuth();
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
   const navigate = useNavigate();
@@ -17,6 +17,10 @@ const TopRightMenu = () => {
 
   if(!user) return null;
 
+  const currentGroupEntry = memberships?.find(m => m.group?._id === currentGroup);
+  const groupLabel = currentGroupEntry?.group?.name || 'No group selected';
+  const groupCode = currentGroupEntry?.group?.code;
+
   return (
     <div className="relative" ref={ref}>
       <button onClick={()=>setOpen(o=>!o)} className="ml-3 px-3 py-2 rounded-lg bg-white/20 text-white text-sm focus:outline-none focus:ring-2 focus:ring-white" aria-haspopup="true" aria-expanded={open}>
@@ -26,7 +30,10 @@ const TopRightMenu = () => {
         <div role="menu" className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg ring-1 ring-black/10 focus:outline-none z-50">
           <div className="px-4 py-3 border-b">
             <p className="text-xs text-gray-500 uppercase tracking-wide">Current group</p>
-            <p className="font-medium text-gray-800 truncate">{currentGroup || 'None selected'}</p>
+            <p className="font-medium text-gray-800 truncate">{groupLabel}</p>
+            {groupCode && (
+              <p className="text-xs text-gray-400 truncate">Code: {groupCode}</p>
+            )}
           </div>
           <div className="py-1">
             <button onClick={()=>{ setOpen(false); navigate('/select-group'); }} className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 flex items-center gap-2" role="menuitem">

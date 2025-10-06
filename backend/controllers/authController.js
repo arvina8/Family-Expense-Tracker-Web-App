@@ -4,6 +4,14 @@ const User = require('../models/User');
 const signToken = (userId) =>
   jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
+const userProjection = '-password';
+
+const populateMemberships = (query) =>
+  query.populate({
+    path: 'memberships.group',
+    populate: { path: 'members.user', select: 'name email' }
+  });
+
 exports.register = async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -12,7 +20,7 @@ exports.register = async (req, res) => {
     if (exists) return res.status(400).json({ error: 'Email already registered' });
     const user = await User.create({ name, email, password });
     const token = signToken(user._id);
-    const safeUser = await User.findById(user._id).select('-password').populate('memberships.group');
+    const safeUser = await populateMemberships(User.findById(user._id).select(userProjection));
     res.status(201).json({ token, user: safeUser });
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -22,7 +30,9 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const user = await User.findOne({ email: email.toLowerCase() }).select('+password').populate('memberships.group');
+    const user = await populateMemberships(
+      User.findOne({ email: email.toLowerCase() }).select('+password')
+    );
     if (!user) return res.status(400).json({ error: 'Invalid credentials' });
     const ok = await user.comparePassword(password);
     if (!ok) return res.status(400).json({ error: 'Invalid credentials' });
@@ -36,7 +46,9 @@ exports.login = async (req, res) => {
 
 exports.me = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id).select('-password').populate('memberships.group');
+    const user = await populateMemberships(
+      User.findById(req.user._id).select(userProjection)
+    );
     res.json({ user });
   } catch (err) {
     res.status(500).json({ error: err.message });

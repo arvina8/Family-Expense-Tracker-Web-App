@@ -21,7 +21,7 @@ const Login = () => {
   else if (count === 1) navigate(`/app/${user.memberships[0].group._id}/dashboard`);
   else navigate('/select-group');
     } catch (err) {
-      setError(err.response?.data?.error || 'Login failed');
+      setError(err.response?.data?.message || err.response?.data?.error || 'Login failed');
     } finally {
       setLoading(false);
     }

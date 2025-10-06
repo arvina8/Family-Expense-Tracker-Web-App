@@ -87,7 +87,11 @@ export const AuthProvider = ({ children }) => {
 
   const switchGroup = (groupId) => {
     setCurrentGroup(groupId);
-    if (groupId) localStorage.setItem('currentGroup', groupId);
+    if (groupId) {
+      localStorage.setItem('currentGroup', groupId);
+    } else {
+      localStorage.removeItem('currentGroup');
+    }
   };
 
   return (

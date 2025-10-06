@@ -22,7 +22,7 @@ const Register = () => {
   else if (count === 1) navigate(`/app/${user.memberships[0].group._id}/dashboard`);
   else navigate('/select-group');
     } catch (err) {
-      setError(err.response?.data?.error || 'Registration failed');
+      setError(err.response?.data?.message || err.response?.data?.error || 'Registration failed');
     } finally {
       setLoading(false);
     }
