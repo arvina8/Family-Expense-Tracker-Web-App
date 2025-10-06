@@ -7,6 +7,9 @@ const {
   updateCategory, 
   deleteCategory 
 } = require('../controllers/categoryController');
+const { auth, requireGroupMember } = require('../middleware/auth');
+
+router.use(auth);
 
 router.post('/', createCategory);
 router.get('/', getCategories);

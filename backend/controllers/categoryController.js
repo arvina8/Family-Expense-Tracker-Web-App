@@ -2,7 +2,14 @@ const Category = require('../models/Category');
 
 exports.createCategory = async (req, res) => {
   try {
-    const category = new Category(req.body);
+    const { name, group } = req.body;
+    if (!name || !group) return res.status(400).json({ error: 'name and group are required' });
+    
+    // Verify user is member of the group
+    const isMember = req.user.memberships?.some(m => String(m.group?._id || m.group) === String(group));
+    if (!isMember) return res.status(403).json({ error: 'Forbidden: not a group member' });
+    
+    const category = new Category({ name, group });
     await category.save();
     res.status(201).json(category);
   } catch (err) {
@@ -12,7 +19,14 @@ exports.createCategory = async (req, res) => {
 
 exports.getCategories = async (req, res) => {
   try {
-    const categories = await Category.find();
+    const { groupId } = req.query;
+    if (!groupId) return res.status(400).json({ error: 'groupId is required' });
+    
+    // Verify user is member of the group
+    const isMember = req.user.memberships?.some(m => String(m.group?._id || m.group) === String(groupId));
+    if (!isMember) return res.status(403).json({ error: 'Forbidden: not a group member' });
+    
+    const categories = await Category.find({ group: groupId });
     res.json(categories);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -33,7 +47,8 @@ exports.getCategoryById = async (req, res) => {
 
 exports.updateCategory = async (req, res) => {
   try {
-    const category = await Category.findByIdAndUpdate(req.params.id, req.body, {
+    const { name } = req.body;
+    const category = await Category.findByIdAndUpdate(req.params.id, { name }, {
       new: true,
       runValidators: true
     });

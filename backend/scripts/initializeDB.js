@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const User = require('../models/User');
+const Group = require('../models/Group');
 const Category = require('../models/Category');
 require('dotenv').config();
 
@@ -11,47 +12,27 @@ async function initializeDatabase() {
     // Check if users already exist
     const userCount = await User.countDocuments();
     if (userCount === 0) {
-      console.log('No users found. Creating default family members...');
+      console.log('No users found. Creating sample users...');
       
       const defaultUsers = [
-        { name: 'Dad', email: 'dad@family.com', password: 'defaultpass123' },
-        { name: 'Mom', email: 'mom@family.com', password: 'defaultpass123' },
-        { name: 'Child 1', email: 'child1@family.com', password: 'defaultpass123' },
-        { name: 'Child 2', email: 'child2@family.com', password: 'defaultpass123' }
+        { name: 'Alice Johnson', email: 'alice@example.com', password: 'defaultpass123' },
+        { name: 'Bob Smith', email: 'bob@example.com', password: 'defaultpass123' },
+        { name: 'Charlie Brown', email: 'charlie@example.com', password: 'defaultpass123' },
+        { name: 'Dana White', email: 'dana@example.com', password: 'defaultpass123' }
       ];
 
       await User.insertMany(defaultUsers);
-      console.log('✓ Default family members created');
+      console.log('✓ Sample users created');
     } else {
-      console.log(`✓ Found ${userCount} existing family members`);
-    }
-
-    // Check if categories already exist
-    const categoryCount = await Category.countDocuments();
-    if (categoryCount === 0) {
-      console.log('No categories found. Creating default categories...');
-      
-      const defaultCategories = [
-        { name: 'Food & Dining' },
-        { name: 'Transportation' },
-        { name: 'Utilities' },
-        { name: 'Entertainment' },
-        { name: 'Healthcare' },
-        { name: 'Shopping' },
-        { name: 'Education' },
-        { name: 'Travel' },
-        { name: 'Home & Garden' },
-        { name: 'Other' }
-      ];
-
-      await Category.insertMany(defaultCategories);
-      console.log('✓ Default categories created');
-    } else {
-      console.log(`✓ Found ${categoryCount} existing categories`);
+      console.log(`✓ Found ${userCount} existing users`);
     }
 
     console.log('\n🎉 Database initialization complete!');
-    console.log('Your Family Expense Tracker is ready to use.');
+    console.log('Your Group Expense Tracker backend is ready to use.');
+    console.log('\n📝 To get started:');
+    console.log('1. Register a new account or login with sample users');
+    console.log('2. Create a group or join an existing one');
+    console.log('3. Add categories and start tracking expenses');
     
   } catch (error) {
     console.error('Error initializing database:', error);

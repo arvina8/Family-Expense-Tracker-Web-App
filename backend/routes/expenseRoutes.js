@@ -8,6 +8,9 @@ const {
   deleteExpense,
   calculateSplitBalance 
 } = require('../controllers/expenseController');
+const { auth } = require('../middleware/auth');
+
+router.use(auth);
 
 router.post('/', createExpense);
 router.get('/', getExpenses);
