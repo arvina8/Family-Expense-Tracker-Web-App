@@ -327,7 +327,7 @@ const ExpenseList = () => {
                     {new Date(expense.date).toLocaleDateString('en-IN')}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">{expense.paidBy?.name}</div>
+                    <div className="text-sm font-medium text-gray-900">{expense.paidBy?.name || 'Unknown'}</div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="text-sm text-gray-900 max-w-xs truncate">

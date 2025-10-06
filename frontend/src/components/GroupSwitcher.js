@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import client from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -6,13 +7,14 @@ import { useToast } from '../context/ToastContext';
 import { ChevronDown, Users, Settings, LogOut, Trash2, Plus } from 'lucide-react';
 
 const GroupSwitcher = () => {
-  const { user, currentGroup, setCurrentGroup } = useAuth();
+  const { user, currentGroup, setCurrentGroup, refreshUser } = useAuth();
   const { theme } = useTheme();
   const toast = useToast();
   const [groups, setGroups] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
   const [showManageMenu, setShowManageMenu] = useState(null);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!user) return;
@@ -34,17 +36,24 @@ const GroupSwitcher = () => {
   const fetchGroups = async () => {
     try {
       const res = await client.get('/groups/mine');
-      const list = res.data.map(m => ({ ...m.group, role: m.role }));
+      const list = res.data
+        .filter(m => m.group)
+        .map(m => ({ ...m.group, role: m.role }));
       setGroups(list);
+      const stillMember = list.some(group => group._id === currentGroup);
+      if (currentGroup && !stillMember) {
+        setCurrentGroup(null);
+      }
     } catch (error) {
       console.error('Error fetching groups:', error);
+      toast.error(error.response?.data?.message || 'Failed to fetch groups');
     }
   };
 
   const handleGroupChange = (groupId) => {
     setCurrentGroup(groupId);
     setIsOpen(false);
-    window.location.href = `/app/${groupId}/dashboard`;
+    navigate(`/app/${groupId}/dashboard`);
   };
 
   const handleLeaveGroup = async (groupId) => {
@@ -55,11 +64,12 @@ const GroupSwitcher = () => {
       await client.post(`/groups/${groupId}/leave`);
       toast.success('Left group successfully');
       await fetchGroups();
+      await refreshUser();
       
       // If leaving current group, redirect to group selection
       if (groupId === currentGroup) {
         setCurrentGroup(null);
-        window.location.href = '/select-group';
+        navigate('/select-group');
       }
     } catch (error) {
       console.error('Error leaving group:', error);
@@ -78,11 +88,12 @@ const GroupSwitcher = () => {
       await client.delete(`/groups/${groupId}`);
       toast.success('Group deleted successfully');
       await fetchGroups();
+      await refreshUser();
       
       // If deleting current group, redirect to group selection
       if (groupId === currentGroup) {
         setCurrentGroup(null);
-        window.location.href = '/select-group';
+        navigate('/select-group');
       }
     } catch (error) {
       console.error('Error deleting group:', error);

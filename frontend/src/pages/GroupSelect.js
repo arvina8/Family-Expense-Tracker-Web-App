@@ -37,15 +37,23 @@ const GroupSelect = () => {
   const createGroup = async (e) => {
     e.preventDefault();
     setError('');
+    setCreating(true);
     try {
       const res = await client.post('/groups', { name });
+      const group = res.data;
+      const groupId = group?._id;
+      if (!groupId) {
+        throw new Error('Invalid response from server');
+      }
       setName('');
       await load();
-      setCurrentGroup(res.data._id);
+      setCurrentGroup(groupId);
       await refreshUser();
-      navigate(`/app/${res.data._id}/dashboard`);
+      navigate(`/app/${groupId}/dashboard`);
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to create group');
+      setError(err.response?.data?.message || err.response?.data?.error || err.message || 'Failed to create group');
+    } finally {
+      setCreating(false);
     }
   };
 
@@ -55,9 +63,14 @@ const GroupSelect = () => {
     setJoining(true);
     try {
       const res = await client.post('/groups/join', { groupIdOrCode: joinCode.trim() });
+      const group = res.data.group;
+      const groupId = group?._id;
+      if (!groupId) {
+        throw new Error('Invalid response from server');
+      }
       await refreshUser();
-      setCurrentGroup(res.data.groupId);
-      navigate(`/app/${res.data.groupId}/dashboard`);
+      setCurrentGroup(groupId);
+      navigate(`/app/${groupId}/dashboard`);
     } catch (err) {
       setError(err.response?.data?.message || err.response?.data?.error || 'Failed to join group');
     } finally {

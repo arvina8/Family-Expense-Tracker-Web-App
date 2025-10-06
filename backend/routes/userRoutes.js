@@ -7,6 +7,9 @@ const {
   updateUser, 
   deleteUser
 } = require('../controllers/userController');
+const { auth } = require('../middleware/auth');
+
+router.use(auth);
 
 router.post('/', createUser);
 router.get('/', getUsers);

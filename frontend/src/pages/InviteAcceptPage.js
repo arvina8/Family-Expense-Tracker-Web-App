@@ -13,15 +13,24 @@ const InviteAcceptPage = () => {
   useEffect(()=>{
     let mounted = true;
     client.post(`/groups/invites/${token}/accept`).then(async res => {
-      if(!mounted) return; setStatus('accepted'); setMessage('Invite accepted! Redirecting...');
-      setCurrentGroup(res.data.groupId);
+      if(!mounted) return;
+      const group = res.data.group;
+      const groupId = group?._id;
+      if (!groupId) {
+        setStatus('error');
+        setMessage('Invite accepted but missing group information.');
+        return;
+      }
+      setStatus('accepted');
+      setMessage('Invite accepted! Redirecting...');
+      setCurrentGroup(groupId);
       try { await refreshUser(); } catch(e){ /* ignore */ }
-      setTimeout(()=> navigate(`/app/${res.data.groupId}/dashboard`), 1200);
+      setTimeout(()=> navigate(`/app/${groupId}/dashboard`), 1200);
     }).catch(err => {
       if(!mounted) return; setStatus('error'); setMessage(err.response?.data?.message || 'Failed to accept invite');
     });
     return ()=>{ mounted=false; };
-  },[token,navigate,setCurrentGroup]);
+  },[token,navigate,setCurrentGroup,refreshUser]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50 p-6">
