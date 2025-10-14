@@ -1,54 +1,127 @@
-# Group Expense Tracker 💰
+# Family Expense Tracker 💰
 
-A comprehensive MERN stack web application for tracking and managing group expenses with intelligent splitting, invitations, and multi-group membership.
+A comprehensive MERN stack web application for tracking and managing group expenses with intelligent splitting, invitations, and multi-group membership functionality.
 
-![Group Expense Tracker](https://img.shields.io/badge/MERN-Stack-blue)
+![MERN Stack](https://img.shields.io/badge/MERN-Stack-blue)
+![Node.js](https://img.shields.io/badge/Node.js-v18+-green)
+![React](https://img.shields.io/badge/React-18-blue)
+![MongoDB](https://img.shields.io/badge/MongoDB-Latest-green)
 
-## 📁 Project Structure
+## ✨ Features
 
 - 👥 **Group Member Management** - Invite, add, and manage members per group
 - ⚖️ **Smart Expense Splitting** - Even split or custom ratios among group members
 - 📊 **Balance Calculations** - Real-time calculations showing who owes what across the group
 - 📨 **Invitations & Join Codes** - Invite by email or join via group code/ID
-- 🔐 **Authentication** - JWT-based login & registration
-- 🚀 **Quick Setup** - One-command database initialization with sample data
-  │ ├── models/ # Mongoose schemas
-  │ │ ├── Expense.js
-  │ │ ├── Category.js
-  │ │ └── User.js
-  │ ├── routes/ # API routes
-- **Sample Users**: Alice, Bob, Charlie, Dana
-  │ │ ├── categoryRoutes.js
-  │ │ └── userRoutes.js
-  │ ├── scripts/ # Utility scripts
-  │ │ └── initializeDB.js
-  │ ├── .env # Environment variables
-  │ ├── server.js # Entry point
-  │ └── package.json
+- 🔐 **JWT Authentication** - Secure login & registration system
+- 🏷️ **Category Management** - Organize expenses with custom categories
+- 📱 **Responsive Design** - Works seamlessly on desktop and mobile
+- 🎨 **Modern UI** - Built with Tailwind CSS and Lucide icons
+- 📈 **Visual Reports** - Charts and graphs for expense visualization
 
-2. Navigate to the **Members** tab (in Dashboard) to manage your group
-   ├── frontend/ # React application
-   │ ├── public/ # Static files
-   │ ├── src/
-   │ │ ├── components/ # Reusable components
-   │ │ │ ├── ExpenseList.js
-   │ │ │ ├── CategoryManager.js
-   │ │ │ ├── GroupMembersManager.js
-   │ │ │ ├── ExpenseSplitting.js
-   │ │ │ ├── Navbar.js
+## 📁 Project Structure
 
-- **Even Split**: Automatically divides equally among all members
-  │ │ │ └── Modal.js
-- **Custom Split**: Set specific ratios (must sum to 100%)
-  │ │ ├── pages/ # Page components
-  │ │ │ ├── Dashboard.js
-  │ │ │ ├── AddExpense.js
-- **Manage Members**: Invite, add, or remove group members; view pending invites
-  │ │ └── index.js # Entry point
-  │ ├── tailwind.config.js # Tailwind configuration
-  │ └── package.json
-  ├── .gitignore # Git ignore rules
-  ├── README.md # Project documentation
+```
+Family-Expense-Tracker-Web-App/
+├── backend/                    # Node.js Express API
+│   ├── controllers/           # Business logic
+│   ├── middleware/           # Auth middleware
+│   ├── models/              # Mongoose schemas
+│   ├── routes/              # API routes
+│   ├── scripts/             # Utility scripts
+│   └── server.js           # Entry point
+├── frontend/               # React application
+│   ├── public/            # Static files
+│   ├── src/
+│   │   ├── components/    # Reusable components
+│   │   ├── pages/        # Page components
+│   │   ├── context/      # React context providers
+│   │   └── api/         # API client
+│   └── package.json
+└── README.md             # Project documentation
+```
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- **Node.js** (v16 or higher)
+- **MongoDB** (local installation or MongoDB Atlas)
+- **npm** package manager
+
+### Installation
+
+1. **Clone the repository**
+
+   ```bash
+   git clone https://github.com/your-username/Family-Expense-Tracker-Web-App.git
+   cd Family-Expense-Tracker-Web-App
+   ```
+
+2. **Setup Backend**
+
+   ```bash
+   cd backend
+   npm install
+
+   # Create .env file from example
+   copy .env.example .env
+   # Edit .env file with your MongoDB connection and JWT secret
+
+   # Initialize database with sample data
+   npm run init
+
+   # Start development server
+   npm run dev
+   ```
+
+3. **Setup Frontend**
+
+   ```bash
+   cd ../frontend
+   npm install
+
+   # Start development server
+   npm start
+   ```
+
+4. **Access the application**
+   - Frontend: http://localhost:3000
+   - Backend API: http://localhost:5000
+
+### Environment Variables
+
+Create a `.env` file in the backend directory:
+
+```bash
+MONGO_URI=mongodb://localhost:27017/family-expense-tracker
+PORT=5000
+NODE_ENV=development
+JWT_SECRET=your-secret-key-here
+```
+
+## 💡 How to Use
+
+### Getting Started
+
+1. **Register** a new account or **login** with existing credentials
+2. **Create a group** or **join an existing group** using group code/ID
+3. **Add categories** to organize your expenses
+4. **Invite members** to your group via email or share the group code
+5. **Start tracking expenses** with smart splitting options
+
+### Expense Splitting Options
+
+- **Even Split**: Automatically divides equally among all group members
+- **Custom Split**: Set specific ratios for each member (must sum to 100%)
+
+### Group Management
+
+- **Invite Members**: Send email invitations or share group codes
+- **Manage Permissions**: Group creators have admin privileges
+- **View Balances**: See who owes what in real-time
+
+## 🔌 API Documentation
 
 ### Auth & Users
 
@@ -194,7 +267,6 @@ npm run eject    # Eject from Create React App (irreversible)
 
 ## 💡 Future Enhancements
 
-- [ ] User authentication and authorization
 - [ ] Email notifications for expense settlements
 - [ ] Export data to CSV/PDF
 - [ ] Mobile app using React Native
@@ -202,6 +274,9 @@ npm run eject    # Eject from Create React App (irreversible)
 - [ ] Receipt photo uploads
 - [ ] Recurring expense templates
 - [ ] Multi-currency support
+- [ ] Offline capability with sync
+- [ ] Dark mode support
+- [ ] Advanced filtering and search
 
 ## 🆘 Support
 
