@@ -300,4 +300,56 @@ CMD ["npm", "start"]
 
 ---
 
+# Family Expense Tracker - Backend API
+
+This is the backend API server for the Family Expense Tracker application, built with Node.js, Express.js, and MongoDB. It provides a complete REST API for managing groups, expenses, categories, and user authentication with JWT security.
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- **Docker** (latest version)
+- **Docker Compose** (latest version)
+
+### Running with Docker
+
+1. **Navigate to the project root directory**
+
+   ```bash
+   cd ..
+   ```
+
+2. **Start the backend service**
+
+   ```bash
+   docker-compose up --build
+   ```
+
+3. **Access the backend API**
+
+   - Local: `http://localhost:5000`
+
+4. **Stop the backend service**
+
+   ```bash
+   docker-compose down
+   ```
+
+### Environment Variables
+
+Ensure the `.env` file is properly configured in the `backend` directory before running the application. Example:
+
+```bash
+MONGO_URI=mongodb://mongo:27017/family-expense-tracker
+PORT=5000
+NODE_ENV=development
+JWT_SECRET=your-secret-key-here
+```
+
+---
+
+For manual setup instructions, refer to the `Quick Start` section above.
+
+---
+
 **Backend API ready to serve your family expense data! 🚀**
