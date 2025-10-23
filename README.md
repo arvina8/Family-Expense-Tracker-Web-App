@@ -53,7 +53,7 @@ Family-Expense-Tracker-Web-App/
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/your-username/Family-Expense-Tracker-Web-App.git
+   git clone https://github.com/vikranth2711/Family-Expense-Tracker-Web-App.git
    cd Family-Expense-Tracker-Web-App
    ```
 
