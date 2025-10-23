@@ -34,6 +34,34 @@ This is the frontend React application for the Family Expense Tracker, built wit
    - Development: http://localhost:3000
    - The app will automatically proxy API requests to http://localhost:5000
 
+### Running with Docker
+
+1. **Navigate to the project root directory**
+
+   ```bash
+   cd ..
+   ```
+
+2. **Start the frontend service**
+
+   ```bash
+   docker-compose up --build
+   ```
+
+3. **Access the application**
+
+   - Local: `http://localhost:3000`
+
+4. **Stop the frontend service**
+
+   ```bash
+   docker-compose down
+   ```
+
+---
+
+For manual setup instructions, refer to the `Quick Start` section above.
+
 ## 📁 Project Structure
 
 ```
